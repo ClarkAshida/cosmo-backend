@@ -1,6 +1,7 @@
 package com.cosmo.cosmo.entity;
 
 import com.cosmo.cosmo.enums.EstadoConservacao;
+import com.cosmo.cosmo.enums.TipoEquipamento;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,18 +13,15 @@ import java.time.LocalDateTime;
 @Getter @Setter @ToString @AllArgsConstructor @NoArgsConstructor
 public class Equipamento {
 
-    @ManyToOne
-    @JoinColumn(name = "tipo_equipamento_id", nullable = false)
-    private TipoEquipamento tipoEquipamento;
-
     // Identificador único do equipamento
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String numeroPatrimonio;
     private String serialNumber;
     private String imei;
-
+    
     // Informações de identificação do equipamento
+    private TipoEquipamento tipoEquipamento;
     private String marca;
     private String modelo;
     private EstadoConservacao estadoConservacao;
