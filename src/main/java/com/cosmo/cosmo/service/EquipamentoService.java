@@ -34,6 +34,12 @@ public class EquipamentoService {
         equipamento.setNumeroPatrimonio(equipamentoDetails.getNumeroPatrimonio());
         equipamento.setSerialNumber(equipamentoDetails.getSerialNumber());
         equipamento.setImei(equipamentoDetails.getImei());
+
+        // Atualizando propriedades específicas para equipamentos celular
+        equipamento.setEid(equipamentoDetails.getEid());
+        equipamento.setNumeroTelefone(equipamentoDetails.getNumeroTelefone());
+        equipamento.setIccid(equipamentoDetails.getIccid());
+
         equipamento.setTipoEquipamento(equipamentoDetails.getTipoEquipamento());
         equipamento.setMarca(equipamentoDetails.getMarca());
         equipamento.setModelo(equipamentoDetails.getModelo());

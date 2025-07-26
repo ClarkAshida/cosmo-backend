@@ -28,6 +28,14 @@ public class Equipamento {
     @Column(nullable = true)
     private String imei;
     
+    // Propriedades específicas para equipamentos celular
+    @Column(nullable = true, length = 32)
+    private String eid; // Identificador único de 32 dígitos para eSIM
+    @Column(nullable = true)
+    private String numeroTelefone; // Número de telefone do dispositivo
+    @Column(nullable = true, length = 20)
+    private String iccid; // Identificador do chip SIM/eSIM
+
     // Informações de identificação do equipamento
     private TipoEquipamento tipoEquipamento;
     private String marca;
@@ -81,4 +89,3 @@ public class Equipamento {
     @Column(nullable = false)
     private StatusEquipamento status;
 }
-
