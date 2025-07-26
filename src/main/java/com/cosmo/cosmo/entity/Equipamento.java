@@ -11,14 +11,21 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter @ToString @AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class Equipamento {
 
     // Identificador único do equipamento
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = true)
     private String numeroPatrimonio;
+    @Column(nullable = true)
     private String serialNumber;
+    @Column(nullable = true)
     private String imei;
     
     // Informações de identificação do equipamento
@@ -26,7 +33,6 @@ public class Equipamento {
     private String marca;
     private String modelo;
     private EstadoConservacao estadoConservacao;
-
     private Boolean termoResponsabilidade;
 
     // Localização do equipamento
@@ -39,14 +45,21 @@ public class Equipamento {
     private Departamento departamento;
 
     // Informações técnicas do equipamento
+    @Column(nullable = true)
     private String sistemaOperacional;
+    @Column(nullable = true)
     private String processador;
+    @Column(nullable = true)
     private String armazenamento;
+    @Column(nullable = true)
     private String hostname;
+    @Column(nullable = true)
     private String dominio;
 
     // Configuração de segurança
+    @Column(nullable = true)
     private Boolean remoteAccessEnabled;
+    @Column(nullable = true)
     private Boolean antivirusEnabled;
 
     // Informações de compra
