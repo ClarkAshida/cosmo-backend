@@ -1,6 +1,7 @@
 package com.cosmo.cosmo.entity;
 
 import com.cosmo.cosmo.enums.EstadoConservacao;
+import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.enums.TipoEquipamento;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,10 +27,6 @@ public class Equipamento {
     private String modelo;
     private EstadoConservacao estadoConservacao;
 
-    // Informações do usuário responsável pelo equipamento
-    @ManyToOne
-    @JoinColumn(name = "usuario_responsavel_id")
-    private Usuario usuarioResponsavel;
     private Boolean termoResponsabilidade;
 
     // Localização do equipamento
@@ -66,5 +63,9 @@ public class Equipamento {
 
     @Column(columnDefinition = "TEXT")
     private String observacoes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusEquipamento status;
 }
 

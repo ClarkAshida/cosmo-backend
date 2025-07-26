@@ -11,8 +11,9 @@ public class Usuario {
     private String email;
     private String cargo;
     private String cpf;
-
+    private String cidade;
     @ManyToOne
     private Departamento departamento;
+    private Boolean ativo;
 
 }
