@@ -1,13 +1,18 @@
 package com.cosmo.cosmo.service;
 
+import com.cosmo.cosmo.dto.EquipamentoRequestDTO;
+import com.cosmo.cosmo.dto.EquipamentoResponseDTO;
 import com.cosmo.cosmo.entity.Equipamento;
-import com.cosmo.cosmo.exception.ResourceNotFoundException;
+import com.cosmo.cosmo.entity.Departamento;
+import com.cosmo.cosmo.entity.Empresa;
+import com.cosmo.cosmo.mapper.EquipamentoMapper;
 import com.cosmo.cosmo.repository.EquipamentoRepository;
+import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EquipamentoService {
@@ -15,49 +20,58 @@ public class EquipamentoService {
     @Autowired
     private EquipamentoRepository equipamentoRepository;
 
-    public List<Equipamento> findAll() {
-        return equipamentoRepository.findAll();
+    @Autowired
+    private EquipamentoMapper equipamentoMapper;
+
+    @Autowired
+    private DepartamentoService departamentoService;
+
+    @Autowired
+    private EmpresaService empresaService;
+
+    public List<EquipamentoResponseDTO> findAll() {
+        return equipamentoRepository.findAll()
+                .stream()
+                .map(equipamentoMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Equipamento findById(Long id) {
-        return equipamentoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Equipamento not found with id: " + id));
+    public EquipamentoResponseDTO findById(Long id) {
+        Equipamento equipamento = equipamentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
+        return equipamentoMapper.toResponseDTO(equipamento);
     }
 
-    public Equipamento save(Equipamento equipamento) {
-        return equipamentoRepository.save(equipamento);
+    public EquipamentoResponseDTO save(EquipamentoRequestDTO requestDTO) {
+        Empresa empresa = empresaService.findEntityById(requestDTO.getEmpresaId());
+        Departamento departamento = departamentoService.findEntityById(requestDTO.getDepartamentoId());
+
+        Equipamento equipamento = equipamentoMapper.toEntity(requestDTO, empresa, departamento);
+        equipamento = equipamentoRepository.save(equipamento);
+        return equipamentoMapper.toResponseDTO(equipamento);
     }
 
-    public Equipamento update(Long id, Equipamento equipamentoDetails) {
-        Equipamento equipamento = findById(id);
+    public EquipamentoResponseDTO update(Long id, EquipamentoRequestDTO requestDTO) {
+        Equipamento equipamento = equipamentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
 
-        equipamento.setNumeroPatrimonio(equipamentoDetails.getNumeroPatrimonio());
-        equipamento.setSerialNumber(equipamentoDetails.getSerialNumber());
-        equipamento.setImei(equipamentoDetails.getImei());
+        Empresa empresa = empresaService.findEntityById(requestDTO.getEmpresaId());
+        Departamento departamento = departamentoService.findEntityById(requestDTO.getDepartamentoId());
 
-        // Atualizando propriedades específicas para equipamentos celular
-        equipamento.setEid(equipamentoDetails.getEid());
-        equipamento.setNumeroTelefone(equipamentoDetails.getNumeroTelefone());
-        equipamento.setIccid(equipamentoDetails.getIccid());
-
-        equipamento.setTipoEquipamento(equipamentoDetails.getTipoEquipamento());
-        equipamento.setMarca(equipamentoDetails.getMarca());
-        equipamento.setModelo(equipamentoDetails.getModelo());
-        equipamento.setEstadoConservacao(equipamentoDetails.getEstadoConservacao());
-        equipamento.setTermoResponsabilidade(equipamentoDetails.getTermoResponsabilidade());
-        equipamento.setEmpresa(equipamentoDetails.getEmpresa());
-        equipamento.setSiglaEstado(equipamentoDetails.getSiglaEstado());
-        equipamento.setDepartamento(equipamentoDetails.getDepartamento());
-        equipamento.setValor(equipamentoDetails.getValor());
-        equipamento.setNotaFiscal(equipamentoDetails.getNotaFiscal());
-        equipamento.setObservacoes(equipamentoDetails.getObservacoes());
-        equipamento.setStatus(equipamentoDetails.getStatus());
-
-        return equipamentoRepository.save(equipamento);
+        equipamentoMapper.updateEntityFromDTO(requestDTO, equipamento, empresa, departamento);
+        equipamento = equipamentoRepository.save(equipamento);
+        return equipamentoMapper.toResponseDTO(equipamento);
     }
 
     public void deleteById(Long id) {
-        Equipamento equipamento = findById(id);
+        Equipamento equipamento = equipamentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
         equipamentoRepository.delete(equipamento);
+    }
+
+    // Método auxiliar para outros services
+    public Equipamento findEntityById(Long id) {
+        return equipamentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
     }
 }
