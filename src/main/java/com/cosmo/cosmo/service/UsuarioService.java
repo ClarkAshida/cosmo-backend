@@ -36,6 +36,7 @@ public class UsuarioService {
         usuario.setCpf(usuarioDetails.getCpf());
         usuario.setCidade(usuarioDetails.getCidade());
         usuario.setDepartamento(usuarioDetails.getDepartamento());
+        usuario.setEmpresa(usuarioDetails.getEmpresa());
         usuario.setAtivo(usuarioDetails.getAtivo());
 
         return usuarioRepository.save(usuario);
@@ -46,8 +47,4 @@ public class UsuarioService {
         usuarioRepository.delete(usuario);
     }
 
-    // Método específico do UsuarioRepository
-    public Usuario findByUsername(String username) {
-        return usuarioRepository.findByUsername(username);
-    }
 }
