@@ -1,3 +1,11 @@
+# .gitignore file created for free with Tower (https://www.git-tower.com/)
+# For suggestions or improvements please contact us using support@git-tower.com
+# Generated on 2025-07-24
+# Includes: spring, java
+
+### Universal ###
+# Common files that should be ignored in all projects
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -31,3 +39,43 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+
+# Logs
+*.log
+# Temporary files
+*.tmp
+*~
+
+*.bak
+# Environment files (containing secrets, API keys, credentials)
+.env
+*.env
+.env.*
+
+# Local configuration that shouldn't be shared
+*.local
+
+### Java ###
+# Java compiled files, build directories, and IDE files
+
+*.class
+*.ctxt
+.mtj.tmp/
+*.jar
+
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+
+*.rar
+hs_err_pid*
+replay_pid*
+.settings/
+bin/
+
+*.launch
+.apt_generated/
