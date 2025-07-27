@@ -2,6 +2,7 @@ package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.dto.HistoricoRequestDTO;
 import com.cosmo.cosmo.dto.HistoricoResponseDTO;
+import com.cosmo.cosmo.dto.EntregaEquipamentoDTO;
 import com.cosmo.cosmo.entity.Historico;
 import com.cosmo.cosmo.entity.Equipamento;
 import com.cosmo.cosmo.entity.Usuario;
@@ -44,6 +45,22 @@ public class HistoricoService {
         Historico historico = historicoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
         return historicoMapper.toResponseDTO(historico);
+    }
+
+    /**
+     * Registra a entrega de um equipamento usando EntregaEquipamentoDTO
+     * Abstrai a conversão do DTO e chama o método principal de entrega
+     */
+    @Transactional
+    public HistoricoResponseDTO entregarEquipamentoComDTO(EntregaEquipamentoDTO entregaDTO) {
+        // Converter EntregaEquipamentoDTO para HistoricoRequestDTO (regra de negócio no service)
+        HistoricoRequestDTO requestDTO = new HistoricoRequestDTO();
+        requestDTO.setEquipamentoId(entregaDTO.getEquipamentoId());
+        requestDTO.setUsuarioId(entregaDTO.getUsuarioId());
+        requestDTO.setObservacoesEntrega(entregaDTO.getObservacoesEntrega());
+        requestDTO.setUrlTermoEntrega(entregaDTO.getUrlTermoEntrega());
+
+        return entregarEquipamento(requestDTO);
     }
 
     /**
@@ -242,4 +259,3 @@ public class HistoricoService {
         return historicoMapper.toResponseDTO(historicoAtivo);
     }
 }
-

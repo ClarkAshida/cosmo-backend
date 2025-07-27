@@ -74,14 +74,8 @@ public class HistoricoController {
     public ResponseEntity<HistoricoResponseDTO> entregarEquipamento(
             @Valid @RequestBody EntregaEquipamentoDTO entregaDTO) {
 
-        // Converter EntregaEquipamentoDTO para HistoricoRequestDTO
-        HistoricoRequestDTO requestDTO = new HistoricoRequestDTO();
-        requestDTO.setEquipamentoId(entregaDTO.getEquipamentoId());
-        requestDTO.setUsuarioId(entregaDTO.getUsuarioId());
-        requestDTO.setObservacoesEntrega(entregaDTO.getObservacoesEntrega());
-        requestDTO.setUrlTermoEntrega(entregaDTO.getUrlTermoEntrega());
-
-        HistoricoResponseDTO historico = historicoService.entregarEquipamento(requestDTO);
+        // Lógica de conversão movida para o service
+        HistoricoResponseDTO historico = historicoService.entregarEquipamentoComDTO(entregaDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(historico);
     }
 

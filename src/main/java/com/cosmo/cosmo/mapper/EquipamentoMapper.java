@@ -74,36 +74,35 @@ public class EquipamentoMapper {
             return null;
         }
 
-        return new EquipamentoResponseDTO(
-                equipamento.getId(),
-                equipamento.getNumeroPatrimonio(),
-                equipamento.getSerialNumber(),
-                equipamento.getImei(),
-                equipamento.getEid(),
-                equipamento.getNumeroTelefone(),
-                equipamento.getIccid(),
-                equipamento.getTipoEquipamento(),
-                equipamento.getMarca(),
-                equipamento.getModelo(),
-                equipamento.getEstadoConservacao(),
-                equipamento.getTermoResponsabilidade(),
-                empresaMapper.toResponseDTO(equipamento.getEmpresa()),
-                equipamento.getSiglaEstado(),
-                departamentoMapper.toResponseDTO(equipamento.getDepartamento()),
-                equipamento.getSistemaOperacional(),
-                equipamento.getProcessador(),
-                equipamento.getArmazenamento(),
-                equipamento.getHostname(),
-                equipamento.getDominio(),
-                equipamento.getRemoteAccessEnabled(),
-                equipamento.getAntivirusEnabled(),
-                equipamento.getValor(),
-                equipamento.getNotaFiscal(),
-                equipamento.getCreatedAt(),
-                equipamento.getUpdatedAt(),
-                equipamento.getObservacoes(),
-                equipamento.getStatus()
-        );
+        EquipamentoResponseDTO responseDTO = new EquipamentoResponseDTO();
+        responseDTO.setId(equipamento.getId());
+        responseDTO.setNumeroPatrimonio(equipamento.getNumeroPatrimonio());
+        responseDTO.setSerialNumber(equipamento.getSerialNumber());
+        responseDTO.setImei(equipamento.getImei());
+        responseDTO.setEid(equipamento.getEid());
+        responseDTO.setNumeroTelefone(equipamento.getNumeroTelefone());
+        responseDTO.setIccid(equipamento.getIccid());
+        responseDTO.setTipoEquipamento(equipamento.getTipoEquipamento());
+        responseDTO.setMarca(equipamento.getMarca());
+        responseDTO.setModelo(equipamento.getModelo());
+        responseDTO.setEstadoConservacao(equipamento.getEstadoConservacao());
+        responseDTO.setTermoResponsabilidade(equipamento.getTermoResponsabilidade());
+        responseDTO.setEmpresa(empresaMapper.toResponseDTO(equipamento.getEmpresa()));
+        responseDTO.setSiglaEstado(equipamento.getSiglaEstado());
+        responseDTO.setDepartamento(departamentoMapper.toResponseDTO(equipamento.getDepartamento()));
+        responseDTO.setSistemaOperacional(equipamento.getSistemaOperacional());
+        responseDTO.setProcessador(equipamento.getProcessador());
+        responseDTO.setArmazenamento(equipamento.getArmazenamento());
+        responseDTO.setHostname(equipamento.getHostname());
+        responseDTO.setDominio(equipamento.getDominio());
+        responseDTO.setRemoteAccessEnabled(equipamento.getRemoteAccessEnabled());
+        responseDTO.setAntivirusEnabled(equipamento.getAntivirusEnabled());
+        responseDTO.setValor(equipamento.getValor());
+        responseDTO.setNotaFiscal(equipamento.getNotaFiscal());
+        responseDTO.setObservacoes(equipamento.getObservacoes());
+        responseDTO.setStatus(equipamento.getStatus());
+
+        return responseDTO;
     }
 
     public void updateEntityFromDTO(EquipamentoRequestDTO requestDTO, Equipamento equipamento,

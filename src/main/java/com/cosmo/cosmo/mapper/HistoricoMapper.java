@@ -25,12 +25,11 @@ public class HistoricoMapper {
         Historico historico = new Historico();
         historico.setEquipamento(equipamento);
         historico.setUsuario(usuario);
-        historico.setDataEntrega(requestDTO.getDataEntrega());
-        historico.setDataDevolucao(requestDTO.getDataDevolucao());
+        // Removido campos que não existem no RequestDTO - eles são definidos no service
         historico.setObservacoesEntrega(requestDTO.getObservacoesEntrega());
-        historico.setObservacoesDevolucao(requestDTO.getObservacoesDevolucao());
         historico.setUrlTermoEntrega(requestDTO.getUrlTermoEntrega());
-        historico.setUrlTermoDevolucao(requestDTO.getUrlTermoDevolucao());
+        // Status padrão para novo histórico
+        historico.setStatusRegistroHistorico(true);
 
         return historico;
     }
@@ -40,17 +39,21 @@ public class HistoricoMapper {
             return null;
         }
 
-        return new HistoricoResponseDTO(
-                historico.getId(),
-                equipamentoMapper.toResponseDTO(historico.getEquipamento()),
-                usuarioMapper.toResponseDTO(historico.getUsuario()),
-                historico.getDataEntrega(),
-                historico.getDataDevolucao(),
-                historico.getObservacoesEntrega(),
-                historico.getObservacoesDevolucao(),
-                historico.getUrlTermoEntrega(),
-                historico.getUrlTermoDevolucao()
-        );
+        HistoricoResponseDTO responseDTO = new HistoricoResponseDTO();
+        responseDTO.setId(historico.getId());
+        responseDTO.setEquipamento(equipamentoMapper.toResponseDTO(historico.getEquipamento()));
+        responseDTO.setUsuario(usuarioMapper.toResponseDTO(historico.getUsuario()));
+        responseDTO.setDataEntrega(historico.getDataEntrega());
+        responseDTO.setDataDevolucao(historico.getDataDevolucao());
+        responseDTO.setObservacoesEntrega(historico.getObservacoesEntrega());
+        responseDTO.setObservacoesDevolucao(historico.getObservacoesDevolucao());
+        responseDTO.setUrlTermoEntrega(historico.getUrlTermoEntrega());
+        responseDTO.setUrlTermoDevolucao(historico.getUrlTermoDevolucao());
+        responseDTO.setStatusRegistroHistorico(historico.getStatusRegistroHistorico());
+        responseDTO.setMotivoCancelamento(historico.getMotivoCancelamento());
+        responseDTO.setDataCancelamento(historico.getDataCancelamento());
+
+        return responseDTO;
     }
 
     public void updateEntityFromDTO(HistoricoRequestDTO requestDTO, Historico historico,
@@ -59,13 +62,9 @@ public class HistoricoMapper {
             return;
         }
 
-        historico.setEquipamento(equipamento);
-        historico.setUsuario(usuario);
-        historico.setDataEntrega(requestDTO.getDataEntrega());
-        historico.setDataDevolucao(requestDTO.getDataDevolucao());
+        // Só permite atualizar campos seguros
         historico.setObservacoesEntrega(requestDTO.getObservacoesEntrega());
-        historico.setObservacoesDevolucao(requestDTO.getObservacoesDevolucao());
         historico.setUrlTermoEntrega(requestDTO.getUrlTermoEntrega());
-        historico.setUrlTermoDevolucao(requestDTO.getUrlTermoDevolucao());
+        // Não permite alterar equipamento, usuário ou dados de devolução via DTO
     }
 }
