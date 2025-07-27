@@ -5,12 +5,14 @@ import com.cosmo.cosmo.dto.EquipamentoResponseDTO;
 import com.cosmo.cosmo.entity.Equipamento;
 import com.cosmo.cosmo.entity.Empresa;
 import com.cosmo.cosmo.entity.Departamento;
+import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.mapper.EquipamentoMapper;
 import com.cosmo.cosmo.repository.EquipamentoRepository;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.DuplicateResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,6 +83,19 @@ public class EquipamentoService {
     public Equipamento findEntityById(Long id) {
         return equipamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
+    }
+
+    /**
+     * Atualiza apenas o status de um equipamento
+     * Método auxiliar para uso do HistoricoService
+     */
+    @Transactional
+    public void updateEntityStatus(Long equipamentoId, StatusEquipamento novoStatus) {
+        Equipamento equipamento = equipamentoRepository.findById(equipamentoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + equipamentoId));
+
+        equipamento.setStatus(novoStatus);
+        equipamentoRepository.save(equipamento);
     }
 
     /**
