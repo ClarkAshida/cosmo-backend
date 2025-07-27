@@ -8,6 +8,7 @@ import com.cosmo.cosmo.entity.Empresa;
 import com.cosmo.cosmo.mapper.UsuarioMapper;
 import com.cosmo.cosmo.repository.UsuarioRepository;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
+import com.cosmo.cosmo.exception.DuplicateResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,16 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO save(UsuarioRequestDTO requestDTO) {
+        // Validar se email já existe
+        if (usuarioRepository.existsByEmail(requestDTO.getEmail())) {
+            throw new DuplicateResourceException("Já existe um usuário cadastrado com o email: " + requestDTO.getEmail());
+        }
+
+        // Validar se CPF já existe
+        if (usuarioRepository.existsByCpf(requestDTO.getCpf())) {
+            throw new DuplicateResourceException("Já existe um usuário cadastrado com o CPF: " + requestDTO.getCpf());
+        }
+
         Departamento departamento = departamentoService.findEntityById(requestDTO.getDepartamentoId());
         Empresa empresa = empresaService.findEntityById(requestDTO.getEmpresaId());
 
@@ -54,6 +65,16 @@ public class UsuarioService {
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO requestDTO) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+
+        // Validar se email já existe em outro usuário
+        if (usuarioRepository.existsByEmailAndIdNot(requestDTO.getEmail(), id)) {
+            throw new DuplicateResourceException("Já existe outro usuário cadastrado com o email: " + requestDTO.getEmail());
+        }
+
+        // Validar se CPF já existe em outro usuário
+        if (usuarioRepository.existsByCpfAndIdNot(requestDTO.getCpf(), id)) {
+            throw new DuplicateResourceException("Já existe outro usuário cadastrado com o CPF: " + requestDTO.getCpf());
+        }
 
         Departamento departamento = departamentoService.findEntityById(requestDTO.getDepartamentoId());
         Empresa empresa = empresaService.findEntityById(requestDTO.getEmpresaId());

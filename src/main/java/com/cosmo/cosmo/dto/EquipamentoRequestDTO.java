@@ -4,7 +4,6 @@ import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.enums.TipoEquipamento;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,17 +14,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EquipamentoRequestDTO {
 
-    @Size(max = 50, message = "Número do patrimônio deve ter no máximo 50 caracteres")
+    // Identificadores únicos
+    @Size(max = 50, message = "Número de patrimônio deve ter no máximo 50 caracteres")
     private String numeroPatrimonio;
 
-    @Size(max = 50, message = "Número de série deve ter no máximo 50 caracteres")
+    @Size(max = 100, message = "Serial number deve ter no máximo 100 caracteres")
     private String serialNumber;
 
-    @Size(max = 20, message = "IMEI deve ter no máximo 20 caracteres")
+    @Size(max = 15, message = "IMEI deve ter no máximo 15 caracteres")
     private String imei;
 
     // Propriedades específicas para equipamentos celular
-    @Size(min = 32, max = 32, message = "EID deve ter exatamente 32 dígitos")
+    @Size(max = 32, message = "EID deve ter no máximo 32 caracteres")
     private String eid;
 
     @Size(max = 20, message = "Número de telefone deve ter no máximo 20 caracteres")
@@ -34,29 +34,31 @@ public class EquipamentoRequestDTO {
     @Size(max = 20, message = "ICCID deve ter no máximo 20 caracteres")
     private String iccid;
 
+    // Informações de identificação do equipamento
     @NotNull(message = "Tipo do equipamento é obrigatório")
     private TipoEquipamento tipoEquipamento;
 
     @Size(max = 50, message = "Marca deve ter no máximo 50 caracteres")
     private String marca;
 
-    @Size(max = 50, message = "Modelo deve ter no máximo 50 caracteres")
+    @Size(max = 100, message = "Modelo deve ter no máximo 100 caracteres")
     private String modelo;
 
     private EstadoConservacao estadoConservacao;
+    private Boolean termoResponsabilidade;
 
-    private Boolean termoResponsabilidade = false;
-
+    // Localização do equipamento
     @NotNull(message = "Empresa é obrigatória")
     private Long empresaId;
 
-    @Size(min = 2, max = 2, message = "Sigla do estado deve ter exatamente 2 caracteres")
+    @Size(max = 2, message = "Sigla do estado deve ter no máximo 2 caracteres")
     private String siglaEstado;
 
     @NotNull(message = "Departamento é obrigatório")
     private Long departamentoId;
 
-    @Size(max = 50, message = "Sistema operacional deve ter no máximo 50 caracteres")
+    // Informações técnicas do equipamento
+    @Size(max = 100, message = "Sistema operacional deve ter no máximo 100 caracteres")
     private String sistemaOperacional;
 
     @Size(max = 100, message = "Processador deve ter no máximo 100 caracteres")
@@ -65,24 +67,25 @@ public class EquipamentoRequestDTO {
     @Size(max = 50, message = "Armazenamento deve ter no máximo 50 caracteres")
     private String armazenamento;
 
-    @Size(max = 50, message = "Hostname deve ter no máximo 50 caracteres")
+    @Size(max = 100, message = "Hostname deve ter no máximo 100 caracteres")
     private String hostname;
 
     @Size(max = 100, message = "Domínio deve ter no máximo 100 caracteres")
     private String dominio;
 
-    private Boolean remoteAccessEnabled = false;
+    // Configuração de segurança
+    private Boolean remoteAccessEnabled;
+    private Boolean antivirusEnabled;
 
-    private Boolean antivirusEnabled = false;
-
-    @Positive(message = "Valor deve ser positivo")
+    // Informações de compra
     private Float valor;
 
     @Size(max = 50, message = "Nota fiscal deve ter no máximo 50 caracteres")
     private String notaFiscal;
 
+    @Size(max = 1000, message = "Observações devem ter no máximo 1000 caracteres")
     private String observacoes;
 
-    @NotNull(message = "Status é obrigatório")
+    @NotNull(message = "Status do equipamento é obrigatório")
     private StatusEquipamento status;
 }

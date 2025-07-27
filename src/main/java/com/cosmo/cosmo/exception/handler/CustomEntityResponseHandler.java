@@ -3,6 +3,7 @@ package com.cosmo.cosmo.exception.handler;
 import com.cosmo.cosmo.exception.ErrorResponse;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.ValidationException;
+import com.cosmo.cosmo.exception.DuplicateResourceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -189,6 +190,20 @@ public class CustomEntityResponseHandler {
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(
+            DuplicateResourceException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Dados duplicados",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ValidationException.class)
