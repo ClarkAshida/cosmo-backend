@@ -40,4 +40,13 @@ public class Historico {
     @Column(nullable = true)
     private String urlTermoDevolucao;
 
+    // Novo campo para controle de status do registro
+    @Column(nullable = false)
+    private Boolean statusRegistroHistorico = true; // true = ativo, false = cancelado
+
+    @Column(columnDefinition = "TEXT")
+    private String motivoCancelamento; // Descrição do motivo do cancelamento
+
+    @Column(nullable = true)
+    private LocalDateTime dataCancelamento; // Data em que foi cancelado
 }

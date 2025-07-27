@@ -32,18 +32,36 @@ public class HistoricoController {
         return ResponseEntity.ok(historico);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<HistoricoResponseDTO> updateHistorico(
+    /**
+     * Edita apenas campos permitidos de um histórico (observações e URL de entrega)
+     * Não permite alterar equipamento, usuário ou dados de devolução
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<HistoricoResponseDTO> editarHistorico(
             @PathVariable Long id,
-            @Valid @RequestBody HistoricoRequestDTO requestDTO) {
-        HistoricoResponseDTO historico = historicoService.update(id, requestDTO);
+            @Valid @RequestBody HistoricoUpdateDTO updateDTO) {
+        HistoricoResponseDTO historico = historicoService.updateHistorico(
+                id,
+                updateDTO.getObservacoesEntrega(),
+                updateDTO.getUrlTermoEntrega()
+        );
         return ResponseEntity.ok(historico);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHistorico(@PathVariable Long id) {
-        historicoService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    /**
+     * Cancela um histórico permanentemente (substitui o DELETE)
+     * Só permite cancelar históricos sem devolução
+     * Reverte equipamento para DISPONIVEL
+     */
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<HistoricoResponseDTO> cancelarHistorico(
+            @PathVariable Long id,
+            @Valid @RequestBody CancelamentoHistoricoDTO cancelamentoDTO) {
+        HistoricoResponseDTO historico = historicoService.cancelarHistorico(
+                id,
+                cancelamentoDTO.getMotivoCancelamento()
+        );
+        return ResponseEntity.ok(historico);
     }
 
     // ==================== MÉTODOS ESPECÍFICOS DE NEGÓCIO ====================
@@ -88,7 +106,7 @@ public class HistoricoController {
     // ==================== MÉTODOS DE CONSULTA ====================
 
     /**
-     * Busca históricos por usuário
+     * Busca históricos por usuário (apenas ativos)
      */
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<HistoricoResponseDTO>> getHistoricosByUsuario(@PathVariable Long usuarioId) {
@@ -97,7 +115,7 @@ public class HistoricoController {
     }
 
     /**
-     * Busca históricos por equipamento
+     * Busca históricos por equipamento (apenas ativos)
      */
     @GetMapping("/equipamento/{equipamentoId}")
     public ResponseEntity<List<HistoricoResponseDTO>> getHistoricosByEquipamento(@PathVariable Long equipamentoId) {

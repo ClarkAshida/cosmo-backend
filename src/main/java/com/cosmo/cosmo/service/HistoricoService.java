@@ -127,6 +127,59 @@ public class HistoricoService {
     }
 
     /**
+     * Cancela um histórico permanentemente
+     * Só permite cancelar históricos que ainda não foram devolvidos
+     * Reverte o equipamento para status DISPONIVEL
+     */
+    @Transactional
+    public HistoricoResponseDTO cancelarHistorico(Long id, String motivoCancelamento) {
+        Historico historico = historicoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
+
+        // Validar se o histórico já foi cancelado
+        if (!historico.getStatusRegistroHistorico()) {
+            throw new ValidationException("Este histórico já foi cancelado anteriormente");
+        }
+
+        // Validar se o histórico já teve devolução
+        if (historico.getDataDevolucao() != null) {
+            throw new ValidationException("Não é possível cancelar um histórico que já teve devolução");
+        }
+
+        // Cancelar o histórico
+        historico.setStatusRegistroHistorico(false);
+        historico.setMotivoCancelamento(motivoCancelamento);
+        historico.setDataCancelamento(LocalDateTime.now());
+
+        // Reverter status do equipamento para DISPONIVEL
+        equipamentoService.updateEntityStatus(historico.getEquipamento().getId(), StatusEquipamento.DISPONIVEL);
+
+        historico = historicoRepository.save(historico);
+        return historicoMapper.toResponseDTO(historico);
+    }
+
+    /**
+     * Atualiza apenas informações limitadas do histórico (observações e URL de entrega)
+     * Não permite alterar equipamento, usuário ou dados de devolução
+     */
+    public HistoricoResponseDTO updateHistorico(Long id, String observacoesEntrega, String urlTermoEntrega) {
+        Historico historico = historicoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
+
+        // Validar se o histórico está ativo
+        if (!historico.getStatusRegistroHistorico()) {
+            throw new ValidationException("Não é possível editar um histórico cancelado");
+        }
+
+        // Atualizar apenas campos permitidos
+        historico.setObservacoesEntrega(observacoesEntrega);
+        historico.setUrlTermoEntrega(urlTermoEntrega);
+
+        historico = historicoRepository.save(historico);
+        return historicoMapper.toResponseDTO(historico);
+    }
+
+    /**
      * Método legado - mantido para compatibilidade, mas agora usa entregarEquipamento
      */
     @Deprecated
@@ -135,43 +188,26 @@ public class HistoricoService {
     }
 
     /**
-     * Atualiza apenas informações do histórico (não afeta status do equipamento)
+     * Método update legado - removido para usar novo método updateHistorico
      */
+    @Deprecated
     public HistoricoResponseDTO update(Long id, HistoricoRequestDTO requestDTO) {
-        Historico historico = historicoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
-
-        // Não permitir alterar equipamento ou usuário após criação
-        if (!historico.getEquipamento().getId().equals(requestDTO.getEquipamentoId()) ||
-            !historico.getUsuario().getId().equals(requestDTO.getUsuarioId())) {
-            throw new ValidationException("Não é possível alterar equipamento ou usuário de um histórico existente");
-        }
-
-        // Atualizar apenas observações e URLs
-        historico.setObservacoesEntrega(requestDTO.getObservacoesEntrega());
-        historico.setUrlTermoEntrega(requestDTO.getUrlTermoEntrega());
-
-        historico = historicoRepository.save(historico);
-        return historicoMapper.toResponseDTO(historico);
+        throw new ValidationException("Método de atualização descontinuado. Use as rotas específicas de edição.");
     }
 
+    /**
+     * Método delete legado - removido para usar cancelamento
+     */
+    @Deprecated
     public void deleteById(Long id) {
-        Historico historico = historicoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
-
-        // Se o equipamento ainda está em uso, liberar antes de deletar o histórico
-        if (historico.getDataDevolucao() == null &&
-            historico.getEquipamento().getStatus() == StatusEquipamento.EM_USO) {
-            equipamentoService.updateEntityStatus(historico.getEquipamento().getId(), StatusEquipamento.DISPONIVEL);
-        }
-
-        historicoRepository.delete(historico);
+        throw new ValidationException("Não é possível deletar históricos. Use o cancelamento para registros incorretos.");
     }
 
-    // Métodos de consulta específicos
+    // Métodos de consulta específicos - atualizados para considerar status ativo
     public List<HistoricoResponseDTO> findByUsuarioId(Long usuarioId) {
         return historicoRepository.findByUsuarioId(usuarioId)
                 .stream()
+                .filter(h -> h.getStatusRegistroHistorico()) // Só históricos ativos
                 .map(historicoMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -179,17 +215,18 @@ public class HistoricoService {
     public List<HistoricoResponseDTO> findByEquipamentoId(Long equipamentoId) {
         return historicoRepository.findByEquipamentoId(equipamentoId)
                 .stream()
+                .filter(h -> h.getStatusRegistroHistorico()) // Só históricos ativos
                 .map(historicoMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Verifica se um equipamento está atualmente em uso
+     * Verifica se um equipamento está atualmente em uso (considera apenas históricos ativos)
      */
     public boolean isEquipamentoEmUso(Long equipamentoId) {
         List<Historico> historicos = historicoRepository.findByEquipamentoId(equipamentoId);
         return historicos.stream()
-                .anyMatch(h -> h.getDataDevolucao() == null);
+                .anyMatch(h -> h.getStatusRegistroHistorico() && h.getDataDevolucao() == null);
     }
 
     /**
@@ -198,10 +235,11 @@ public class HistoricoService {
     public HistoricoResponseDTO findHistoricoAtivoByEquipamento(Long equipamentoId) {
         List<Historico> historicos = historicoRepository.findByEquipamentoId(equipamentoId);
         Historico historicoAtivo = historicos.stream()
-                .filter(h -> h.getDataDevolucao() == null)
+                .filter(h -> h.getStatusRegistroHistorico() && h.getDataDevolucao() == null)
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Nenhum histórico ativo encontrado para o equipamento: " + equipamentoId));
 
         return historicoMapper.toResponseDTO(historicoAtivo);
     }
 }
+
