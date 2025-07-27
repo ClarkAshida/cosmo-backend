@@ -47,7 +47,13 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUsuario(@PathVariable Long id) {
-        usuarioService.deleteById(id);
+        usuarioService.deactivateById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativar")
+    public ResponseEntity<UsuarioResponseDTO> reativarUsuario(@PathVariable Long id) {
+        UsuarioResponseDTO usuario = usuarioService.reactivateById(id);
+        return ResponseEntity.ok(usuario);
     }
 }

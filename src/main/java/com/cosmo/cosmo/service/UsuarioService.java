@@ -63,10 +63,20 @@ public class UsuarioService {
         return usuarioMapper.toResponseDTO(usuario);
     }
 
-    public void deleteById(Long id) {
+    public void deactivateById(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
-        usuarioRepository.delete(usuario);
+        usuario.setAtivo(false);
+        usuarioRepository.save(usuario);
+    }
+
+    public UsuarioResponseDTO reactivateById(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+
+        usuario.setAtivo(true);
+        usuario = usuarioRepository.save(usuario);
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     // Método auxiliar para outros services
