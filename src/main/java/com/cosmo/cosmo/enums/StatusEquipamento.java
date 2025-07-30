@@ -5,5 +5,6 @@ public enum StatusEquipamento {
     EM_USO,
     EM_MANUTENCAO,
     DANIFICADO,
+    CRIPTOGRAFADO,
     DESCARTADO
 }
