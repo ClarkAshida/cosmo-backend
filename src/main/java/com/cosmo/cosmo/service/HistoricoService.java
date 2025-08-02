@@ -4,7 +4,7 @@ import com.cosmo.cosmo.dto.HistoricoRequestDTO;
 import com.cosmo.cosmo.dto.HistoricoResponseDTO;
 import com.cosmo.cosmo.dto.EntregaEquipamentoDTO;
 import com.cosmo.cosmo.entity.Historico;
-import com.cosmo.cosmo.entity.Equipamento;
+import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Usuario;
 import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.mapper.HistoricoMapper;

@@ -1,8 +1,9 @@
 package com.cosmo.cosmo.entity;
 
+import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity

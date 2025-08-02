@@ -3,7 +3,7 @@ package com.cosmo.cosmo.mapper;
 import com.cosmo.cosmo.dto.HistoricoRequestDTO;
 import com.cosmo.cosmo.dto.HistoricoResponseDTO;
 import com.cosmo.cosmo.entity.Historico;
-import com.cosmo.cosmo.entity.Equipamento;
+import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
