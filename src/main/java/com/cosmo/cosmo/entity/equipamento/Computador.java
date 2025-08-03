@@ -1,20 +1,22 @@
 package com.cosmo.cosmo.entity.equipamento;
 
-import com.cosmo.cosmo.enums.StatusPropriedade;
 import jakarta.persistence.*;
 import lombok.*;
 
-@MappedSuperclass
+@Entity
+@Table(name = "computador")
 @Getter
 @Setter
 @ToString(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Computador extends Equipamento {
 
     /**
      * Sistema Operacional instalado (ex: "Windows 11 Pro", "Ubuntu 22.04 LTS").
      */
+    @Column(name = "sistema_operacional")
     private String sistemaOperacional;
 
     /**
@@ -25,6 +27,7 @@ public abstract class Computador extends Equipamento {
     /**
      * Quantidade de memória RAM instalada (ex: "16GB DDR4").
      */
+    @Column(name = "memoria_ram")
     private String memoriaRAM;
 
     /**
@@ -42,13 +45,12 @@ public abstract class Computador extends Equipamento {
     /**
      * Indica se o acesso remoto (como RDP ou TeamViewer) está habilitado.
      */
+    @Column(name = "remote_access_enabled")
     private Boolean remoteAccessEnabled;
 
     /**
      * Indica se há uma solução de antivírus corporativo instalada e ativa.
      */
+    @Column(name = "antivirus_enabled")
     private Boolean antivirusEnabled;
-
-    @Enumerated(EnumType.STRING)
-    private StatusPropriedade statusPropriedade;
 }

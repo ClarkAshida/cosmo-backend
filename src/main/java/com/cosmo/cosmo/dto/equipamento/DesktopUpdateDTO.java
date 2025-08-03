@@ -26,6 +26,7 @@ public class DesktopUpdateDTO {
     private String siglaEstado;
     private Long departamentoId;
     private String observacoes;
+    private StatusPropriedade statusPropriedade;
 
     // Campos específicos de Computador
     private String sistemaOperacional;
@@ -36,5 +37,4 @@ public class DesktopUpdateDTO {
     private String dominio;
     private Boolean remoteAccessEnabled;
     private Boolean antivirusEnabled;
-    private StatusPropriedade statusPropriedade;
 }

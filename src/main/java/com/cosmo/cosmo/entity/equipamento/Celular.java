@@ -7,8 +7,6 @@ import lombok.*;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
 public class Celular extends Equipamento {
 
     /**
@@ -32,10 +30,12 @@ public class Celular extends Equipamento {
     /**
      * Indica se o dispositivo é gerenciado por uma solução de MDM (Mobile Device Management).
      */
+    @Column(name = "gerenciado_por_mdm")
     private Boolean gerenciadoPorMDM;
 
     /**
      * Indica qual é o MDM que está configurado no aparelho.
      */
+    @Column(name = "mdm")
     private String MDM;
 }

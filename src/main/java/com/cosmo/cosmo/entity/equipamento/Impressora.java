@@ -7,13 +7,12 @@ import lombok.*;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
 public class Impressora extends Equipamento {
 
     /**
      * Tipo da impressora (ex: "Laser", "Jato de Tinta", "Térmica").
      */
+    @Column(name = "tipo_impressora")
     private String tipoImpressora;
 
     /**
@@ -29,10 +28,12 @@ public class Impressora extends Equipamento {
     /**
      * Endereço IP da impressora na rede.
      */
+    @Column(name = "endereco_ip")
     private String enderecoIP;
 
     /**
      * Código ou modelo do suprimento (toner, cartucho) utilizado.
      */
+    @Column(name = "modelo_suprimento")
     private String modeloSuprimento;
 }

@@ -2,6 +2,7 @@ package com.cosmo.cosmo.dto.equipamento;
 
 import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
+import com.cosmo.cosmo.enums.StatusPropriedade;
 import lombok.*;
 
 @Getter
@@ -25,6 +26,7 @@ public class ImpressoraCreateDTO {
     private String siglaEstado;
     private Long departamentoId;
     private String observacoes;
+    private StatusPropriedade statusPropriedade;
 
     // Campos específicos de Impressora
     private String tipoImpressora;

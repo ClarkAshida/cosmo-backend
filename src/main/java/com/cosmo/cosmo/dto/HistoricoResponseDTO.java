@@ -1,5 +1,6 @@
 package com.cosmo.cosmo.dto;
 
+import com.cosmo.cosmo.dto.equipamento.EquipamentoResponseDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;

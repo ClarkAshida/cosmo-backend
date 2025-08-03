@@ -4,6 +4,7 @@ import com.cosmo.cosmo.entity.Departamento;
 import com.cosmo.cosmo.entity.Empresa;
 import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
+import com.cosmo.cosmo.enums.StatusPropriedade;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -52,6 +53,9 @@ public abstract class Equipamento {
 
     @Column(columnDefinition = "TEXT")
     private String observacoes;
+
+    @Enumerated(EnumType.STRING)
+    private StatusPropriedade statusPropriedade;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

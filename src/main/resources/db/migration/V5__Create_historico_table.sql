@@ -1,5 +1,5 @@
--- Criação da tabela Historico
--- Esta tabela representa o histórico de entrega e devolução de equipamentos
+-- Criação da tabela historico para controle de empréstimos de equipamentos
+
 CREATE TABLE historico (
     id BIGINT NOT NULL AUTO_INCREMENT,
     equipamento_id BIGINT NOT NULL,
@@ -24,7 +24,6 @@ CREATE INDEX idx_historico_usuario ON historico(usuario_id);
 CREATE INDEX idx_historico_data_entrega ON historico(data_entrega);
 CREATE INDEX idx_historico_data_devolucao ON historico(data_devolucao);
 CREATE INDEX idx_historico_status ON historico(status_registro_historico);
-CREATE INDEX idx_historico_equipamento_usuario ON historico(equipamento_id, usuario_id);
 
--- Índice composto para buscar históricos ativos de um equipamento
-CREATE INDEX idx_historico_equipamento_ativo ON historico(equipamento_id, status_registro_historico);
+-- Índice composto para consultas de equipamentos em uso
+CREATE INDEX idx_historico_ativo ON historico(equipamento_id, status_registro_historico, data_devolucao);

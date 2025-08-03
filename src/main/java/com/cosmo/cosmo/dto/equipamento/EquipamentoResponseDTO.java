@@ -2,6 +2,7 @@ package com.cosmo.cosmo.dto.equipamento;
 
 import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
+import com.cosmo.cosmo.enums.StatusPropriedade;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class EquipamentoResponseDTO {
     private Long departamentoId;
     private String departamentoNome;
     private String observacoes;
+    private StatusPropriedade statusPropriedade;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

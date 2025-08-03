@@ -7,8 +7,6 @@ import lombok.*;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
 public class Chip extends Equipamento {
 
     /**

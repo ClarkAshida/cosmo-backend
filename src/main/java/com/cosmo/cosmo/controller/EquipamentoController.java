@@ -51,17 +51,7 @@ public class EquipamentoController {
         return ResponseEntity.ok(equipamentos);
     }
 
-    /**
-     * GET /api/equipamentos/tipo/{tipo}/count
-     * Conta equipamentos por tipo específico
-     */
-    @GetMapping("/tipo/{tipo}/count")
-    public ResponseEntity<Long> countByTipo(@PathVariable TipoEquipamento tipo) {
-        Long count = equipamentoService.countByTipo(tipo);
-        return ResponseEntity.ok(count);
-    }
-
-    // ==================== ENDPOINTS DE CRIAÇÃO (POST) ====================
+    // ==================== ENDPOINTS DE CRIAÇÃO ESPECÍFICOS (POST) ====================
 
     /**
      * POST /api/equipamentos/notebook
@@ -69,8 +59,8 @@ public class EquipamentoController {
      */
     @PostMapping("/notebook")
     public ResponseEntity<EquipamentoResponseDTO> createNotebook(@Valid @RequestBody NotebookCreateDTO createDTO) {
-        EquipamentoResponseDTO response = equipamentoService.createNotebook(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EquipamentoResponseDTO equipamento = equipamentoService.createNotebook(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
 
     /**
@@ -79,8 +69,8 @@ public class EquipamentoController {
      */
     @PostMapping("/desktop")
     public ResponseEntity<EquipamentoResponseDTO> createDesktop(@Valid @RequestBody DesktopCreateDTO createDTO) {
-        EquipamentoResponseDTO response = equipamentoService.createDesktop(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EquipamentoResponseDTO equipamento = equipamentoService.createDesktop(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
 
     /**
@@ -89,8 +79,8 @@ public class EquipamentoController {
      */
     @PostMapping("/celular")
     public ResponseEntity<EquipamentoResponseDTO> createCelular(@Valid @RequestBody CelularCreateDTO createDTO) {
-        EquipamentoResponseDTO response = equipamentoService.createCelular(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EquipamentoResponseDTO equipamento = equipamentoService.createCelular(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
 
     /**
@@ -99,8 +89,8 @@ public class EquipamentoController {
      */
     @PostMapping("/chip")
     public ResponseEntity<EquipamentoResponseDTO> createChip(@Valid @RequestBody ChipCreateDTO createDTO) {
-        EquipamentoResponseDTO response = equipamentoService.createChip(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EquipamentoResponseDTO equipamento = equipamentoService.createChip(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
 
     /**
@@ -109,8 +99,8 @@ public class EquipamentoController {
      */
     @PostMapping("/impressora")
     public ResponseEntity<EquipamentoResponseDTO> createImpressora(@Valid @RequestBody ImpressoraCreateDTO createDTO) {
-        EquipamentoResponseDTO response = equipamentoService.createImpressora(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EquipamentoResponseDTO equipamento = equipamentoService.createImpressora(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
 
     /**
@@ -119,22 +109,20 @@ public class EquipamentoController {
      */
     @PostMapping("/monitor")
     public ResponseEntity<EquipamentoResponseDTO> createMonitor(@Valid @RequestBody MonitorCreateDTO createDTO) {
-        EquipamentoResponseDTO response = equipamentoService.createMonitor(createDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EquipamentoResponseDTO equipamento = equipamentoService.createMonitor(createDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
 
-    // ==================== ENDPOINTS DE ATUALIZAÇÃO (PUT) ====================
+    // ==================== ENDPOINTS DE ATUALIZAÇÃO ESPECÍFICOS (PUT) ====================
 
     /**
      * PUT /api/equipamentos/notebook/{id}
      * Atualiza um notebook existente
      */
     @PutMapping("/notebook/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateNotebook(
-            @PathVariable Long id,
-            @Valid @RequestBody NotebookUpdateDTO updateDTO) {
-        EquipamentoResponseDTO response = equipamentoService.updateNotebook(id, updateDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<EquipamentoResponseDTO> updateNotebook(@PathVariable Long id, @Valid @RequestBody NotebookUpdateDTO updateDTO) {
+        EquipamentoResponseDTO equipamento = equipamentoService.updateNotebook(id, updateDTO);
+        return ResponseEntity.ok(equipamento);
     }
 
     /**
@@ -142,11 +130,9 @@ public class EquipamentoController {
      * Atualiza um desktop existente
      */
     @PutMapping("/desktop/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateDesktop(
-            @PathVariable Long id,
-            @Valid @RequestBody DesktopUpdateDTO updateDTO) {
-        EquipamentoResponseDTO response = equipamentoService.updateDesktop(id, updateDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<EquipamentoResponseDTO> updateDesktop(@PathVariable Long id, @Valid @RequestBody DesktopUpdateDTO updateDTO) {
+        EquipamentoResponseDTO equipamento = equipamentoService.updateDesktop(id, updateDTO);
+        return ResponseEntity.ok(equipamento);
     }
 
     /**
@@ -154,11 +140,9 @@ public class EquipamentoController {
      * Atualiza um celular existente
      */
     @PutMapping("/celular/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateCelular(
-            @PathVariable Long id,
-            @Valid @RequestBody CelularUpdateDTO updateDTO) {
-        EquipamentoResponseDTO response = equipamentoService.updateCelular(id, updateDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<EquipamentoResponseDTO> updateCelular(@PathVariable Long id, @Valid @RequestBody CelularUpdateDTO updateDTO) {
+        EquipamentoResponseDTO equipamento = equipamentoService.updateCelular(id, updateDTO);
+        return ResponseEntity.ok(equipamento);
     }
 
     /**
@@ -166,11 +150,9 @@ public class EquipamentoController {
      * Atualiza um chip existente
      */
     @PutMapping("/chip/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateChip(
-            @PathVariable Long id,
-            @Valid @RequestBody ChipUpdateDTO updateDTO) {
-        EquipamentoResponseDTO response = equipamentoService.updateChip(id, updateDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<EquipamentoResponseDTO> updateChip(@PathVariable Long id, @Valid @RequestBody ChipUpdateDTO updateDTO) {
+        EquipamentoResponseDTO equipamento = equipamentoService.updateChip(id, updateDTO);
+        return ResponseEntity.ok(equipamento);
     }
 
     /**
@@ -178,11 +160,9 @@ public class EquipamentoController {
      * Atualiza uma impressora existente
      */
     @PutMapping("/impressora/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateImpressora(
-            @PathVariable Long id,
-            @Valid @RequestBody ImpressoraUpdateDTO updateDTO) {
-        EquipamentoResponseDTO response = equipamentoService.updateImpressora(id, updateDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<EquipamentoResponseDTO> updateImpressora(@PathVariable Long id, @Valid @RequestBody ImpressoraUpdateDTO updateDTO) {
+        EquipamentoResponseDTO equipamento = equipamentoService.updateImpressora(id, updateDTO);
+        return ResponseEntity.ok(equipamento);
     }
 
     /**
@@ -190,18 +170,16 @@ public class EquipamentoController {
      * Atualiza um monitor existente
      */
     @PutMapping("/monitor/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateMonitor(
-            @PathVariable Long id,
-            @Valid @RequestBody MonitorUpdateDTO updateDTO) {
-        EquipamentoResponseDTO response = equipamentoService.updateMonitor(id, updateDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<EquipamentoResponseDTO> updateMonitor(@PathVariable Long id, @Valid @RequestBody MonitorUpdateDTO updateDTO) {
+        EquipamentoResponseDTO equipamento = equipamentoService.updateMonitor(id, updateDTO);
+        return ResponseEntity.ok(equipamento);
     }
 
     // ==================== ENDPOINT DE EXCLUSÃO (DELETE) ====================
 
     /**
      * DELETE /api/equipamentos/{id}
-     * Remove um equipamento (mantido, funciona para qualquer tipo)
+     * Exclui um equipamento por ID
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
@@ -209,38 +187,15 @@ public class EquipamentoController {
         return ResponseEntity.noContent().build();
     }
 
-    // ==================== ENDPOINTS LEGADOS (DEPRECATED) ====================
-
-    /**
-     * @deprecated Use os endpoints específicos por tipo
-     * POST /api/equipamentos - Método legado
-     */
-    @Deprecated
-    @PostMapping
-    public ResponseEntity<String> createEquipamento(@RequestBody Object requestDTO) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Endpoint descontinuado. Use os endpoints específicos: /notebook, /celular, /impressora, etc.");
-    }
-
-    /**
-     * @deprecated Use os endpoints específicos por tipo
-     * PUT /api/equipamentos/{id} - Método legado
-     */
-    @Deprecated
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateEquipamento(@PathVariable Long id, @RequestBody Object requestDTO) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Endpoint descontinuado. Use os endpoints específicos: /notebook/{id}, /celular/{id}, /impressora/{id}, etc.");
-    }
-
     // ==================== ENDPOINTS AUXILIARES ====================
 
     /**
-     * GET /api/equipamentos/tipos
-     * Lista todos os tipos de equipamento disponíveis
+     * GET /api/equipamentos/tipo/{tipo}/count
+     * Conta equipamentos por tipo
      */
-    @GetMapping("/tipos")
-    public ResponseEntity<TipoEquipamento[]> getTiposEquipamento() {
-        return ResponseEntity.ok(TipoEquipamento.values());
+    @GetMapping("/tipo/{tipo}/count")
+    public ResponseEntity<Long> countByTipo(@PathVariable TipoEquipamento tipo) {
+        Long count = equipamentoService.countByTipo(tipo);
+        return ResponseEntity.ok(count);
     }
 }
