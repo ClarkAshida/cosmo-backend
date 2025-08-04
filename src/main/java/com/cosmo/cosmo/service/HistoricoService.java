@@ -1,8 +1,6 @@
 package com.cosmo.cosmo.service;
 
-import com.cosmo.cosmo.dto.HistoricoRequestDTO;
-import com.cosmo.cosmo.dto.HistoricoResponseDTO;
-import com.cosmo.cosmo.dto.EntregaEquipamentoDTO;
+import com.cosmo.cosmo.dto.*;
 import com.cosmo.cosmo.entity.Historico;
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Usuario;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -257,5 +256,177 @@ public class HistoricoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Nenhum histórico ativo encontrado para o equipamento: " + equipamentoId));
 
         return historicoMapper.toResponseDTO(historicoAtivo);
+    }
+
+    // ==================== MÉTODOS PARA OPERAÇÕES MÚLTIPLAS ====================
+
+    /**
+     * Realiza a entrega de múltiplos equipamentos para um usuário
+     * Todos os equipamentos devem estar disponíveis para que a operação seja realizada
+     * Se algum equipamento não estiver disponível, toda a transação é cancelada (rollback)
+     */
+    @Transactional
+    public OperacaoMultiplaResponseDTO entregarMultiplosEquipamentos(EntregaMultiplaDTO entregaMultiplaDTO) {
+        List<HistoricoResponseDTO> historicosProcessados = new ArrayList<>();
+        List<String> erros = new ArrayList<>();
+
+        // Validar se o usuário existe
+        Usuario usuario = usuarioService.findEntityById(entregaMultiplaDTO.getUsuarioId());
+
+        // Pré-validação: verificar se todos os equipamentos estão disponíveis
+        List<Equipamento> equipamentos = new ArrayList<>();
+        for (Long equipamentoId : entregaMultiplaDTO.getEquipamentoIds()) {
+            try {
+                Equipamento equipamento = equipamentoService.findEntityById(equipamentoId);
+
+                // Validar status do equipamento
+                if (equipamento.getStatus() == StatusEquipamento.EM_USO) {
+                    throw new ValidationException("Equipamento ID " + equipamentoId + " já está em uso");
+                }
+
+                if (equipamento.getStatus() == StatusEquipamento.DANIFICADO) {
+                    throw new ValidationException("Equipamento ID " + equipamentoId + " está danificado e não pode ser entregue");
+                }
+
+                equipamentos.add(equipamento);
+
+            } catch (Exception e) {
+                erros.add("Equipamento ID " + equipamentoId + ": " + e.getMessage());
+            }
+        }
+
+        // Se houver erros na validação, não processa nenhum item
+        if (!erros.isEmpty()) {
+            return new OperacaoMultiplaResponseDTO(
+                entregaMultiplaDTO.getEquipamentoIds().size(),
+                0,
+                erros.size(),
+                historicosProcessados,
+                erros,
+                "Operação cancelada devido a erros de validação. Nenhum equipamento foi entregue."
+            );
+        }
+
+        // Processar cada equipamento individualmente
+        for (Equipamento equipamento : equipamentos) {
+            try {
+                // Criar HistoricoRequestDTO para cada equipamento
+                HistoricoRequestDTO requestDTO = new HistoricoRequestDTO();
+                requestDTO.setEquipamentoId(equipamento.getId());
+                requestDTO.setUsuarioId(entregaMultiplaDTO.getUsuarioId());
+                requestDTO.setObservacoesEntrega(entregaMultiplaDTO.getObservacoesEntrega());
+                requestDTO.setUrlTermoEntrega(entregaMultiplaDTO.getUrlTermoEntrega());
+
+                // Realizar a entrega
+                HistoricoResponseDTO historico = entregarEquipamento(requestDTO);
+                historicosProcessados.add(historico);
+
+            } catch (Exception e) {
+                erros.add("Erro ao entregar equipamento ID " + equipamento.getId() + ": " + e.getMessage());
+            }
+        }
+
+        String observacaoGeral = erros.isEmpty()
+            ? "Todos os equipamentos foram entregues com sucesso"
+            : "Operação concluída com alguns erros";
+
+        return new OperacaoMultiplaResponseDTO(
+            entregaMultiplaDTO.getEquipamentoIds().size(),
+            historicosProcessados.size(),
+            erros.size(),
+            historicosProcessados,
+            erros,
+            observacaoGeral
+        );
+    }
+
+    /**
+     * Realiza a devolução de múltiplos equipamentos
+     * Permite observações específicas para cada equipamento e URL única do termo de devolução
+     */
+    @Transactional
+    public OperacaoMultiplaResponseDTO devolverMultiplosEquipamentos(DevolucaoMultiplaDTO devolucaoMultiplaDTO) {
+        List<HistoricoResponseDTO> historicosProcessados = new ArrayList<>();
+        List<String> erros = new ArrayList<>();
+
+        // Pré-validação: verificar se todos os históricos existem e estão válidos para devolução
+        List<Historico> historicos = new ArrayList<>();
+        for (ItemDevolucaoDTO item : devolucaoMultiplaDTO.getItensDevolvidos()) {
+            try {
+                Historico historico = historicoRepository.findById(item.getHistoricoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com ID: " + item.getHistoricoId()));
+
+                // Validar se já foi devolvido
+                if (historico.getDataDevolucao() != null) {
+                    throw new ValidationException("Histórico ID " + item.getHistoricoId() + " já foi devolvido anteriormente");
+                }
+
+                // Validar se está ativo
+                if (!historico.getStatusRegistroHistorico()) {
+                    throw new ValidationException("Histórico ID " + item.getHistoricoId() + " está cancelado");
+                }
+
+                // Validar se o novo status é válido
+                if (item.getNovoStatus() == StatusEquipamento.EM_USO) {
+                    throw new ValidationException("Não é possível devolver equipamento mantendo status EM_USO");
+                }
+
+                historicos.add(historico);
+
+            } catch (Exception e) {
+                erros.add("Histórico ID " + item.getHistoricoId() + ": " + e.getMessage());
+            }
+        }
+
+        // Se houver erros na validação, não processa nenhum item
+        if (!erros.isEmpty()) {
+            return new OperacaoMultiplaResponseDTO(
+                devolucaoMultiplaDTO.getItensDevolvidos().size(),
+                0,
+                erros.size(),
+                historicosProcessados,
+                erros,
+                "Operação cancelada devido a erros de validação. Nenhum equipamento foi devolvido."
+            );
+        }
+
+        // Processar cada devolução individualmente
+        for (int i = 0; i < historicos.size(); i++) {
+            Historico historico = historicos.get(i);
+            ItemDevolucaoDTO item = devolucaoMultiplaDTO.getItensDevolvidos().get(i);
+
+            try {
+                // Atualizar dados da devolução
+                historico.setDataDevolucao(LocalDateTime.now());
+                historico.setObservacoesDevolucao(item.getObservacoesDevolucao());
+                historico.setUrlTermoDevolucao(devolucaoMultiplaDTO.getUrlTermoDevolucao()); // URL única para todos
+
+                // Definir status final (padrão: DISPONIVEL)
+                StatusEquipamento statusFinal = item.getNovoStatus() != null ? item.getNovoStatus() : StatusEquipamento.DISPONIVEL;
+
+                // Salvar histórico e atualizar status do equipamento
+                historico = historicoRepository.save(historico);
+                equipamentoService.updateEntityStatus(historico.getEquipamento().getId(), statusFinal);
+
+                HistoricoResponseDTO historicoResponse = historicoMapper.toResponseDTO(historico);
+                historicosProcessados.add(historicoResponse);
+
+            } catch (Exception e) {
+                erros.add("Erro ao devolver equipamento (Histórico ID " + item.getHistoricoId() + "): " + e.getMessage());
+            }
+        }
+
+        String observacaoGeral = erros.isEmpty()
+            ? "Todos os equipamentos foram devolvidos com sucesso"
+            : "Operação concluída com alguns erros";
+
+        return new OperacaoMultiplaResponseDTO(
+            devolucaoMultiplaDTO.getItensDevolvidos().size(),
+            historicosProcessados.size(),
+            erros.size(),
+            historicosProcessados,
+            erros,
+            observacaoGeral
+        );
     }
 }

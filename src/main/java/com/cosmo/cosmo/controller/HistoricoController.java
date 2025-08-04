@@ -134,4 +134,56 @@ public class HistoricoController {
         HistoricoResponseDTO historico = historicoService.findHistoricoAtivoByEquipamento(equipamentoId);
         return ResponseEntity.ok(historico);
     }
+
+    // ==================== ENDPOINTS PARA OPERAÇÕES MÚLTIPLAS ====================
+
+    /**
+     * POST /api/historicos/entregar-multiplos
+     * Realiza a entrega de múltiplos equipamentos para um usuário
+     * Cada equipamento terá seu próprio registro de histórico individual
+     */
+    @PostMapping("/entregar-multiplos")
+    public ResponseEntity<OperacaoMultiplaResponseDTO> entregarMultiplosEquipamentos(
+            @Valid @RequestBody EntregaMultiplaDTO entregaMultiplaDTO) {
+
+        OperacaoMultiplaResponseDTO resultado = historicoService.entregarMultiplosEquipamentos(entregaMultiplaDTO);
+
+        // Se todos falharam, retorna BAD_REQUEST
+        if (resultado.getItensSucesso() == 0) {
+            return ResponseEntity.badRequest().body(resultado);
+        }
+
+        // Se alguns falharam, retorna PARTIAL_CONTENT (207)
+        if (resultado.getItensErro() > 0) {
+            return ResponseEntity.status(207).body(resultado); // 207 Multi-Status
+        }
+
+        // Se todos tiveram sucesso, retorna CREATED
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+    }
+
+    /**
+     * PATCH /api/historicos/devolver-multiplos
+     * Realiza a devolução de múltiplos equipamentos
+     * Permite observações específicas para cada equipamento e URL única do termo
+     */
+    @PatchMapping("/devolver-multiplos")
+    public ResponseEntity<OperacaoMultiplaResponseDTO> devolverMultiplosEquipamentos(
+            @Valid @RequestBody DevolucaoMultiplaDTO devolucaoMultiplaDTO) {
+
+        OperacaoMultiplaResponseDTO resultado = historicoService.devolverMultiplosEquipamentos(devolucaoMultiplaDTO);
+
+        // Se todos falharam, retorna BAD_REQUEST
+        if (resultado.getItensSucesso() == 0) {
+            return ResponseEntity.badRequest().body(resultado);
+        }
+
+        // Se alguns falharam, retorna PARTIAL_CONTENT (207)
+        if (resultado.getItensErro() > 0) {
+            return ResponseEntity.status(207).body(resultado); // 207 Multi-Status
+        }
+
+        // Se todos tiveram sucesso, retorna OK
+        return ResponseEntity.ok(resultado);
+    }
 }
