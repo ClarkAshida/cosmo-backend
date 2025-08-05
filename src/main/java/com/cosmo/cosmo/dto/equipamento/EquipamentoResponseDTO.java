@@ -4,6 +4,7 @@ import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.enums.StatusPropriedade;
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class EquipamentoResponseDTO {
+@EqualsAndHashCode(callSuper = true)
+public class EquipamentoResponseDTO extends RepresentationModel<EquipamentoResponseDTO> {
 
     private Long id;
     private String numeroPatrimonio;

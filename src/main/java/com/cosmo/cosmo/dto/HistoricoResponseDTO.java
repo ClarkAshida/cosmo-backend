@@ -4,14 +4,17 @@ import com.cosmo.cosmo.dto.equipamento.EquipamentoResponseDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HistoricoResponseDTO {
+@EqualsAndHashCode(callSuper = true)
+public class HistoricoResponseDTO extends RepresentationModel<HistoricoResponseDTO> {
 
     private Long id;
 

@@ -1,5 +1,6 @@
 package com.cosmo.cosmo.service;
 
+import com.cosmo.cosmo.controller.EquipamentoController;
 import com.cosmo.cosmo.dto.equipamento.*;
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Empresa;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @Service
 public class EquipamentoService {
@@ -39,64 +42,80 @@ public class EquipamentoService {
     public List<EquipamentoResponseDTO> findAll() {
         return equipamentoRepository.findAll()
                 .stream()
-                .map(equipamentoMapper::toResponseDTO)
+                .map(equipamento -> {
+                    EquipamentoResponseDTO dto = equipamentoMapper.toResponseDTO(equipamento);
+                    return addHateoasLinks(dto);
+                })
                 .collect(Collectors.toList());
     }
 
     public EquipamentoResponseDTO findById(Long id) {
         Equipamento equipamento = equipamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
-        return equipamentoMapper.toResponseDTO(equipamento);
+        EquipamentoResponseDTO dto = equipamentoMapper.toResponseDTO(equipamento);
+        return addHateoasLinks(dto);
     }
 
     // Métodos específicos para criação por tipo de equipamento
     public EquipamentoResponseDTO createNotebook(NotebookCreateDTO createDTO) {
-        return createEquipamento(createDTO, TipoEquipamento.NOTEBOOK);
+        EquipamentoResponseDTO dto = createEquipamento(createDTO, TipoEquipamento.NOTEBOOK);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO createDesktop(DesktopCreateDTO createDTO) {
-        return createEquipamento(createDTO, TipoEquipamento.DESKTOP);
+        EquipamentoResponseDTO dto = createEquipamento(createDTO, TipoEquipamento.DESKTOP);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO createCelular(CelularCreateDTO createDTO) {
-        return createEquipamento(createDTO, TipoEquipamento.CELULAR);
+        EquipamentoResponseDTO dto = createEquipamento(createDTO, TipoEquipamento.CELULAR);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO createChip(ChipCreateDTO createDTO) {
-        return createEquipamento(createDTO, TipoEquipamento.CHIP);
+        EquipamentoResponseDTO dto = createEquipamento(createDTO, TipoEquipamento.CHIP);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO createImpressora(ImpressoraCreateDTO createDTO) {
-        return createEquipamento(createDTO, TipoEquipamento.IMPRESSORA);
+        EquipamentoResponseDTO dto = createEquipamento(createDTO, TipoEquipamento.IMPRESSORA);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO createMonitor(MonitorCreateDTO createDTO) {
-        return createEquipamento(createDTO, TipoEquipamento.MONITOR);
+        EquipamentoResponseDTO dto = createEquipamento(createDTO, TipoEquipamento.MONITOR);
+        return addHateoasLinks(dto);
     }
 
     // Métodos específicos para atualização por tipo de equipamento
     public EquipamentoResponseDTO updateNotebook(Long id, NotebookUpdateDTO updateDTO) {
-        return updateEquipamento(id, updateDTO);
+        EquipamentoResponseDTO dto = updateEquipamento(id, updateDTO);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO updateDesktop(Long id, DesktopUpdateDTO updateDTO) {
-        return updateEquipamento(id, updateDTO);
+        EquipamentoResponseDTO dto = updateEquipamento(id, updateDTO);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO updateCelular(Long id, CelularUpdateDTO updateDTO) {
-        return updateEquipamento(id, updateDTO);
+        EquipamentoResponseDTO dto = updateEquipamento(id, updateDTO);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO updateChip(Long id, ChipUpdateDTO updateDTO) {
-        return updateEquipamento(id, updateDTO);
+        EquipamentoResponseDTO dto = updateEquipamento(id, updateDTO);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO updateImpressora(Long id, ImpressoraUpdateDTO updateDTO) {
-        return updateEquipamento(id, updateDTO);
+        EquipamentoResponseDTO dto = updateEquipamento(id, updateDTO);
+        return addHateoasLinks(dto);
     }
 
     public EquipamentoResponseDTO updateMonitor(Long id, MonitorUpdateDTO updateDTO) {
-        return updateEquipamento(id, updateDTO);
+        EquipamentoResponseDTO dto = updateEquipamento(id, updateDTO);
+        return addHateoasLinks(dto);
     }
 
     // Método genérico para criação
@@ -142,6 +161,57 @@ public class EquipamentoService {
         return equipamentoMapper.toResponseDTO(equipamento);
     }
 
+    private EquipamentoResponseDTO addHateoasLinks(EquipamentoResponseDTO dto) {
+        Long id = dto.getId();
+        String tipo = dto.getTipo().toLowerCase();
+
+        // Link para si mesmo
+        dto.add(linkTo(methodOn(EquipamentoController.class).findById(id)).withSelfRel());
+
+        // Link para listar todos os equipamentos
+        dto.add(linkTo(methodOn(EquipamentoController.class).findAll()).withRel("equipamentos"));
+
+        // Link para listar equipamentos do mesmo tipo
+        TipoEquipamento tipoEnum = TipoEquipamento.valueOf(dto.getTipo().toUpperCase());
+        dto.add(linkTo(methodOn(EquipamentoController.class).findByTipo(tipoEnum)).withRel("mesmo-tipo"));
+
+        // Links específicos por tipo de equipamento para atualização
+        switch (tipo) {
+            case "notebook":
+                dto.add(linkTo(methodOn(EquipamentoController.class).updateNotebook(id, null)).withRel("update"));
+                dto.add(linkTo(methodOn(EquipamentoController.class).createNotebook(null)).withRel("create-notebook"));
+                break;
+            case "desktop":
+                dto.add(linkTo(methodOn(EquipamentoController.class).updateDesktop(id, null)).withRel("update"));
+                dto.add(linkTo(methodOn(EquipamentoController.class).createDesktop(null)).withRel("create-desktop"));
+                break;
+            case "celular":
+                dto.add(linkTo(methodOn(EquipamentoController.class).updateCelular(id, null)).withRel("update"));
+                dto.add(linkTo(methodOn(EquipamentoController.class).createCelular(null)).withRel("create-celular"));
+                break;
+            case "chip":
+                dto.add(linkTo(methodOn(EquipamentoController.class).updateChip(id, null)).withRel("update"));
+                dto.add(linkTo(methodOn(EquipamentoController.class).createChip(null)).withRel("create-chip"));
+                break;
+            case "impressora":
+                dto.add(linkTo(methodOn(EquipamentoController.class).updateImpressora(id, null)).withRel("update"));
+                dto.add(linkTo(methodOn(EquipamentoController.class).createImpressora(null)).withRel("create-impressora"));
+                break;
+            case "monitor":
+                dto.add(linkTo(methodOn(EquipamentoController.class).updateMonitor(id, null)).withRel("update"));
+                dto.add(linkTo(methodOn(EquipamentoController.class).createMonitor(null)).withRel("create-monitor"));
+                break;
+        }
+
+        // Link para deletar
+        dto.add(linkTo(methodOn(EquipamentoController.class).deleteById(id)).withRel("delete"));
+
+        // Link para contagem por tipo
+        dto.add(linkTo(methodOn(EquipamentoController.class).countByTipo(tipoEnum)).withRel("count-tipo"));
+
+        return dto;
+    }
+
     public void deleteById(Long id) {
         if (!equipamentoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Equipamento não encontrado com id: " + id);
@@ -173,7 +243,10 @@ public class EquipamentoService {
         Class<? extends Equipamento> entityClass = getEntityClassByTipo(tipo);
         return equipamentoRepository.findByTipo(entityClass)
                 .stream()
-                .map(equipamentoMapper::toResponseDTO)
+                .map(equipamento -> {
+                    EquipamentoResponseDTO dto = equipamentoMapper.toResponseDTO(equipamento);
+                    return addHateoasLinks(dto);
+                })
                 .collect(Collectors.toList());
     }
 

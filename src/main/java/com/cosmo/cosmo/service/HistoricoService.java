@@ -1,5 +1,6 @@
 package com.cosmo.cosmo.service;
 
+import com.cosmo.cosmo.controller.HistoricoController;
 import com.cosmo.cosmo.dto.*;
 import com.cosmo.cosmo.entity.Historico;
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
@@ -17,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @Service
 public class HistoricoService {
@@ -36,14 +39,18 @@ public class HistoricoService {
     public List<HistoricoResponseDTO> findAll() {
         return historicoRepository.findAll()
                 .stream()
-                .map(historicoMapper::toResponseDTO)
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinks(dto);
+                })
                 .collect(Collectors.toList());
     }
 
     public HistoricoResponseDTO findById(Long id) {
         Historico historico = historicoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
-        return historicoMapper.toResponseDTO(historico);
+        HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+        return addHateoasLinks(dto);
     }
 
     /**
@@ -91,7 +98,8 @@ public class HistoricoService {
         historico = historicoRepository.save(historico);
         equipamentoService.updateEntityStatus(equipamento.getId(), StatusEquipamento.EM_USO);
 
-        return historicoMapper.toResponseDTO(historico);
+        HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+        return addHateoasLinks(dto);
     }
 
     /**
@@ -129,7 +137,8 @@ public class HistoricoService {
         historico = historicoRepository.save(historico);
         equipamentoService.updateEntityStatus(historico.getEquipamento().getId(), statusFinal);
 
-        return historicoMapper.toResponseDTO(historico);
+        HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+        return addHateoasLinks(dto);
     }
 
     /**
@@ -171,7 +180,8 @@ public class HistoricoService {
         equipamentoService.updateEntityStatus(historico.getEquipamento().getId(), StatusEquipamento.DISPONIVEL);
 
         historico = historicoRepository.save(historico);
-        return historicoMapper.toResponseDTO(historico);
+        HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+        return addHateoasLinks(dto);
     }
 
     /**
@@ -192,7 +202,8 @@ public class HistoricoService {
         historico.setUrlTermoEntrega(urlTermoEntrega);
 
         historico = historicoRepository.save(historico);
-        return historicoMapper.toResponseDTO(historico);
+        HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+        return addHateoasLinks(dto);
     }
 
     /**
@@ -224,7 +235,10 @@ public class HistoricoService {
         return historicoRepository.findByUsuarioId(usuarioId)
                 .stream()
                 .filter(h -> h.getStatusRegistroHistorico()) // Só históricos ativos
-                .map(historicoMapper::toResponseDTO)
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinks(dto);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -232,7 +246,10 @@ public class HistoricoService {
         return historicoRepository.findByEquipamentoId(equipamentoId)
                 .stream()
                 .filter(h -> h.getStatusRegistroHistorico()) // Só históricos ativos
-                .map(historicoMapper::toResponseDTO)
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinks(dto);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -255,7 +272,8 @@ public class HistoricoService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Nenhum histórico ativo encontrado para o equipamento: " + equipamentoId));
 
-        return historicoMapper.toResponseDTO(historicoAtivo);
+        HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historicoAtivo);
+        return addHateoasLinks(dto);
     }
 
     // ==================== MÉTODOS PARA OPERAÇÕES MÚLTIPLAS ====================
@@ -297,7 +315,7 @@ public class HistoricoService {
 
         // Se houver erros na validação, não processa nenhum item
         if (!erros.isEmpty()) {
-            return new OperacaoMultiplaResponseDTO(
+            OperacaoMultiplaResponseDTO resultado = new OperacaoMultiplaResponseDTO(
                 entregaMultiplaDTO.getEquipamentoIds().size(),
                 0,
                 erros.size(),
@@ -305,6 +323,7 @@ public class HistoricoService {
                 erros,
                 "Operação cancelada devido a erros de validação. Nenhum equipamento foi entregue."
             );
+            return addHateoasLinksToOperacaoMultipla(resultado, "entrega");
         }
 
         // Processar cada equipamento individualmente
@@ -330,7 +349,7 @@ public class HistoricoService {
             ? "Todos os equipamentos foram entregues com sucesso"
             : "Operação concluída com alguns erros";
 
-        return new OperacaoMultiplaResponseDTO(
+        OperacaoMultiplaResponseDTO resultado = new OperacaoMultiplaResponseDTO(
             entregaMultiplaDTO.getEquipamentoIds().size(),
             historicosProcessados.size(),
             erros.size(),
@@ -338,6 +357,8 @@ public class HistoricoService {
             erros,
             observacaoGeral
         );
+
+        return addHateoasLinksToOperacaoMultipla(resultado, "entrega");
     }
 
     /**
@@ -380,7 +401,7 @@ public class HistoricoService {
 
         // Se houver erros na validação, não processa nenhum item
         if (!erros.isEmpty()) {
-            return new OperacaoMultiplaResponseDTO(
+            OperacaoMultiplaResponseDTO resultado = new OperacaoMultiplaResponseDTO(
                 devolucaoMultiplaDTO.getItensDevolvidos().size(),
                 0,
                 erros.size(),
@@ -388,6 +409,7 @@ public class HistoricoService {
                 erros,
                 "Operação cancelada devido a erros de validação. Nenhum equipamento foi devolvido."
             );
+            return addHateoasLinksToOperacaoMultipla(resultado, "devolucao");
         }
 
         // Processar cada devolução individualmente
@@ -409,6 +431,7 @@ public class HistoricoService {
                 equipamentoService.updateEntityStatus(historico.getEquipamento().getId(), statusFinal);
 
                 HistoricoResponseDTO historicoResponse = historicoMapper.toResponseDTO(historico);
+                historicoResponse = addHateoasLinks(historicoResponse);
                 historicosProcessados.add(historicoResponse);
 
             } catch (Exception e) {
@@ -420,7 +443,7 @@ public class HistoricoService {
             ? "Todos os equipamentos foram devolvidos com sucesso"
             : "Operação concluída com alguns erros";
 
-        return new OperacaoMultiplaResponseDTO(
+        OperacaoMultiplaResponseDTO resultado = new OperacaoMultiplaResponseDTO(
             devolucaoMultiplaDTO.getItensDevolvidos().size(),
             historicosProcessados.size(),
             erros.size(),
@@ -428,5 +451,56 @@ public class HistoricoService {
             erros,
             observacaoGeral
         );
+
+        return addHateoasLinksToOperacaoMultipla(resultado, "devolucao");
+    }
+
+    // ==================== MÉTODOS AUXILIARES PARA HATEOAS ====================
+
+    private HistoricoResponseDTO addHateoasLinks(HistoricoResponseDTO dto) {
+        Long id = dto.getId();
+
+        // Link para si mesmo
+        dto.add(linkTo(methodOn(HistoricoController.class).getHistoricoById(id)).withSelfRel());
+
+        // Link para listar todos os históricos
+        dto.add(linkTo(methodOn(HistoricoController.class).getAllHistoricos()).withRel("historicos"));
+
+        // Links baseados no estado do histórico
+        if (dto.getStatusRegistroHistorico()) {
+            // Histórico ativo - permite edição
+            dto.add(linkTo(methodOn(HistoricoController.class).editarHistorico(id, null)).withRel("editar"));
+
+            if (dto.getDataDevolucao() == null) {
+                // Não foi devolvido ainda - permite devolução e cancelamento
+                dto.add(linkTo(methodOn(HistoricoController.class).devolverEquipamento(id, null)).withRel("devolver"));
+                dto.add(linkTo(methodOn(HistoricoController.class).cancelarHistorico(id, null)).withRel("cancelar"));
+            }
+        }
+
+
+        // Links para operações múltiplas
+        dto.add(linkTo(methodOn(HistoricoController.class).entregarMultiplosEquipamentos(null)).withRel("entrega-multipla"));
+        dto.add(linkTo(methodOn(HistoricoController.class).devolverMultiplosEquipamentos(null)).withRel("devolucao-multipla"));
+
+        return dto;
+    }
+
+    private OperacaoMultiplaResponseDTO addHateoasLinksToOperacaoMultipla(OperacaoMultiplaResponseDTO dto, String tipoOperacao) {
+        // Link para listar todos os históricos
+        dto.add(linkTo(methodOn(HistoricoController.class).getAllHistoricos()).withRel("historicos"));
+
+        // Links para operações múltiplas
+        dto.add(linkTo(methodOn(HistoricoController.class).entregarMultiplosEquipamentos(null)).withRel("entrega-multipla"));
+        dto.add(linkTo(methodOn(HistoricoController.class).devolverMultiplosEquipamentos(null)).withRel("devolucao-multipla"));
+
+        // Link para nova operação do mesmo tipo
+        if ("entrega".equals(tipoOperacao)) {
+            dto.add(linkTo(methodOn(HistoricoController.class).entregarEquipamento(null)).withRel("nova-entrega"));
+        } else if ("devolucao".equals(tipoOperacao)) {
+            dto.add(linkTo(methodOn(HistoricoController.class).devolverMultiplosEquipamentos(null)).withRel("nova-devolucao"));
+        }
+
+        return dto;
     }
 }
