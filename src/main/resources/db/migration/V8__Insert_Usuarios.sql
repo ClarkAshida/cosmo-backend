@@ -1,0 +1,16 @@
+INSERT INTO usuario (nome, email, cargo, cpf, cidade, departamento_id, empresa_id, ativo) VALUES
+('Lucas Pereira Almeida', 'lucas.almeida@alaresinternet.com.br', 'Analista de Sistemas', '678.901.234-56', 'Salvador', 29, 6, TRUE),
+('Sofia Rodrigues Lima', 'sofia.lima@alaresinternet.com.br', 'Engenheira de Software', '789.012.345-67', 'Fortaleza', 29, 7, TRUE),
+('Pedro Araujo Carvalho', 'pedro.carvalho@alaresinternet.com.br', 'Coordenador de Marketing', '890.123.456-78', 'Brasília', 49, 9, TRUE),
+('Beatriz Gomes Martins', 'beatriz.martins@alaresinternet.com.br', 'Especialista em Redes', '901.234.567-89', 'Recife', 56, 10, TRUE),
+('Gabriel Rocha Ribeiro', 'gabriel.ribeiro@alaresinternet.com.br', 'Analista de Suporte', '012.345.678-90', 'Manaus', 24, 2, TRUE),
+('Mariana Alves Monteiro', 'mariana.monteiro@alaresinternet.com.br', 'Gerente de Projetos', '112.233.445-56', 'Goiânia', 53, 12, TRUE),
+('Gustavo Barros Freitas', 'gustavo.freitas@alaresinternet.com.br', 'Designer UX/UI', '223.344.556-67', 'Belém', 30, 14, TRUE),
+('Felipe Nascimento Costa', 'felipe.costa@alaresinternet.com.br', 'Analista de Dados', '334.455.667-78', 'Natal', 26, 8, TRUE),
+('Amanda Lima Martins', 'amanda.martins@alaresinternet.com.br', 'Recrutadora', '445.566.778-89', 'João Pessoa', 54, 1, TRUE),
+('Bruno Rodrigues Gomes', 'bruno.gomes@alaresinternet.com.br', 'Assistente Administrativo', '556.677.889-90', 'Florianópolis', 2, 3, TRUE),
+('Camila Pereira Araujo', 'camila.araujo@alaresinternet.com.br', 'Técnica de Instalação', '667.788.990-01', 'Vitória', 41, 16, TRUE),
+('Rafael Carvalho Rocha', 'rafael.rocha@alaresinternet.com.br', 'Supervisor de Vendas', '778.899.001-12', 'Campo Grande', 4, 18, TRUE),
+('Vinicius Alves Ribeiro', 'vinicius.ribeiro@alaresinternet.com.br', 'Consultor de TI', '889.900.112-23', 'Cuiabá', 12, 20, TRUE),
+('Leticia Monteiro Barros', 'leticia.barros@alaresinternet.com.br', 'Arquiteta de Soluções', '990.011.223-34', 'Teresina', 53, 21, TRUE),
+('Thiago Freitas Santos', 'thiago.santos@alaresinternet.com.br', 'Especialista em Segurança', '102.938.475-65', 'Maceió', 36, 15, TRUE);
