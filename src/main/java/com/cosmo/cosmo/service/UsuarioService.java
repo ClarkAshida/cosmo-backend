@@ -1,6 +1,7 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.UsuarioController;
+import com.cosmo.cosmo.dto.PagedResponseDTO;
 import com.cosmo.cosmo.dto.UsuarioRequestDTO;
 import com.cosmo.cosmo.dto.UsuarioResponseDTO;
 import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
@@ -13,9 +14,13 @@ import com.cosmo.cosmo.repository.UsuarioRepository;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.DuplicateResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -35,14 +40,35 @@ public class UsuarioService {
     @Autowired
     private EmpresaService empresaService;
 
-    public List<UsuarioResponseDTO> findAll() {
-        return usuarioRepository.findAll()
+    public PagedResponseDTO<UsuarioResponseDTO> findAll(Pageable pageable) {
+        Page<Usuario> page = usuarioRepository.findAll(pageable);
+
+        List<UsuarioResponseDTO> usuarios = page.getContent()
                 .stream()
                 .map(usuario -> {
                     UsuarioResponseDTO dto = usuarioMapper.toResponseDTO(usuario);
                     return addHateoasLinksWithNestedEntities(dto);
                 })
                 .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<UsuarioResponseDTO>> embedded = new HashMap<>();
+        embedded.put("usuarios", usuarios);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<UsuarioResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinks(response, pageable, page);
+
+        return response;
     }
 
     public UsuarioResponseDTO findById(Long id) {
@@ -137,6 +163,39 @@ public class UsuarioService {
         return dto;
     }
 
+    private void addPaginationLinks(PagedResponseDTO<UsuarioResponseDTO> response, Pageable pageable, Page<?> page) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+            pageable.getSort().iterator().next().getProperty() : "nome";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+            (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "asc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(UsuarioController.class)
+                .getAllUsuarios(currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(UsuarioController.class)
+                .getAllUsuarios(0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(UsuarioController.class)
+                .getAllUsuarios(page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(UsuarioController.class)
+                    .getAllUsuarios(currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(UsuarioController.class)
+                    .getAllUsuarios(currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+    }
+
     private UsuarioResponseDTO addHateoasLinks(UsuarioResponseDTO dto) {
         Long id = dto.getId();
 
@@ -144,7 +203,8 @@ public class UsuarioService {
         dto.add(linkTo(methodOn(UsuarioController.class).getUsuarioById(id)).withSelfRel());
 
         // Link para listar todos os usuários
-        dto.add(linkTo(methodOn(UsuarioController.class).getAllUsuarios()).withRel("usuarios"));
+        dto.add(linkTo(methodOn(UsuarioController.class)
+                .getAllUsuarios(0, 10, "nome", "asc")).withRel("usuarios"));
 
         // Link para atualizar
         dto.add(linkTo(methodOn(UsuarioController.class).updateUsuario(id, null)).withRel("update"));
@@ -160,3 +220,4 @@ public class UsuarioService {
         return dto;
     }
 }
+

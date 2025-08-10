@@ -1,15 +1,17 @@
 package com.cosmo.cosmo.controller;
 
+import com.cosmo.cosmo.dto.PagedResponseDTO;
 import com.cosmo.cosmo.dto.UsuarioRequestDTO;
 import com.cosmo.cosmo.dto.UsuarioResponseDTO;
 import com.cosmo.cosmo.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -20,8 +22,18 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<List<UsuarioResponseDTO>> getAllUsuarios() {
-        List<UsuarioResponseDTO> usuarios = usuarioService.findAll();
+    public ResponseEntity<PagedResponseDTO<UsuarioResponseDTO>> getAllUsuarios(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<UsuarioResponseDTO> usuarios = usuarioService.findAll(pageable);
         return ResponseEntity.ok(usuarios);
     }
 
