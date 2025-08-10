@@ -1,6 +1,7 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.EquipamentoController;
+import com.cosmo.cosmo.dto.PagedResponseDTO;
 import com.cosmo.cosmo.dto.equipamento.*;
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Empresa;
@@ -13,10 +14,14 @@ import com.cosmo.cosmo.repository.equipamento.EquipamentoRepositoryFactory;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.DuplicateResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -39,14 +44,67 @@ public class EquipamentoService {
     @Autowired
     private DepartamentoService departamentoService;
 
-    public List<EquipamentoResponseDTO> findAll() {
-        return equipamentoRepository.findAll()
+    public PagedResponseDTO<EquipamentoResponseDTO> findAll(Pageable pageable) {
+        Page<Equipamento> page = equipamentoRepository.findAll(pageable);
+
+        List<EquipamentoResponseDTO> equipamentos = page.getContent()
                 .stream()
                 .map(equipamento -> {
                     EquipamentoResponseDTO dto = equipamentoMapper.toResponseDTO(equipamento);
-                    return addHateoasLinks(dto);
+                    return addHateoasLinksWithNestedEntities(dto);
                 })
                 .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<EquipamentoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("equipamentos", equipamentos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<EquipamentoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinks(response, pageable, page);
+
+        return response;
+    }
+
+    public PagedResponseDTO<EquipamentoResponseDTO> findByTipo(TipoEquipamento tipo, Pageable pageable) {
+        Class<? extends Equipamento> entityClass = getEntityClassByTipo(tipo);
+        Page<Equipamento> page = equipamentoRepository.findByTipo(entityClass, pageable);
+
+        List<EquipamentoResponseDTO> equipamentos = page.getContent()
+                .stream()
+                .map(equipamento -> {
+                    EquipamentoResponseDTO dto = equipamentoMapper.toResponseDTO(equipamento);
+                    return addHateoasLinksWithNestedEntities(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<EquipamentoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("equipamentos", equipamentos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<EquipamentoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL específicos para o tipo
+        addPaginationLinksByTipo(response, pageable, page, tipo);
+
+        return response;
     }
 
     public EquipamentoResponseDTO findById(Long id) {
@@ -169,11 +227,13 @@ public class EquipamentoService {
         dto.add(linkTo(methodOn(EquipamentoController.class).findById(id)).withSelfRel());
 
         // Link para listar todos os equipamentos
-        dto.add(linkTo(methodOn(EquipamentoController.class).findAll()).withRel("equipamentos"));
+        dto.add(linkTo(methodOn(EquipamentoController.class)
+                .findAll(0, 10, "marca", "asc")).withRel("equipamentos"));
 
         // Link para listar equipamentos do mesmo tipo
         TipoEquipamento tipoEnum = TipoEquipamento.valueOf(dto.getTipo().toUpperCase());
-        dto.add(linkTo(methodOn(EquipamentoController.class).findByTipo(tipoEnum)).withRel("mesmo-tipo"));
+        dto.add(linkTo(methodOn(EquipamentoController.class)
+                .findByTipo(tipoEnum, 0, 10, "marca", "asc")).withRel("mesmo-tipo"));
 
         // Links específicos por tipo de equipamento para atualização
         switch (tipo) {
@@ -452,5 +512,99 @@ public class EquipamentoService {
     @Deprecated
     public EquipamentoResponseDTO update(Long id, Object requestDTO) {
         throw new UnsupportedOperationException("Use os métodos específicos de atualização por tipo (updateNotebook, updateCelular, etc.)");
+    }
+
+    private void addPaginationLinks(PagedResponseDTO<EquipamentoResponseDTO> response, Pageable pageable, Page<?> page) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+            pageable.getSort().iterator().next().getProperty() : "id";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+            (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "asc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findAll(currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findAll(0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findAll(page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(EquipamentoController.class)
+                    .findAll(currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(EquipamentoController.class)
+                    .findAll(currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+    }
+
+    private void addPaginationLinksByTipo(PagedResponseDTO<EquipamentoResponseDTO> response, Pageable pageable, Page<?> page, TipoEquipamento tipo) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+            pageable.getSort().iterator().next().getProperty() : "marca";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+            (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "asc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findByTipo(tipo, currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findByTipo(tipo, 0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findByTipo(tipo, page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(EquipamentoController.class)
+                    .findByTipo(tipo, currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(EquipamentoController.class)
+                    .findByTipo(tipo, currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+
+        // Link para todos os equipamentos
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findAll(0, 10, "marca", "asc")).withRel("todos-equipamentos"));
+    }
+
+    private EquipamentoResponseDTO addHateoasLinksWithNestedEntities(EquipamentoResponseDTO dto) {
+        // Adicionar links HATEOAS para o equipamento principal
+        addHateoasLinks(dto);
+
+        // Criar objetos simples de departamento e empresa com apenas ID e nome
+        if (dto.getDepartamentoId() != null) {
+            Departamento departamentoEntity = departamentoService.findEntityById(dto.getDepartamentoId());
+            com.cosmo.cosmo.dto.DepartamentoResponseDTO departamentoSimples = new com.cosmo.cosmo.dto.DepartamentoResponseDTO();
+            departamentoSimples.setId(departamentoEntity.getId());
+            departamentoSimples.setNome(departamentoEntity.getNome());
+            dto.setDepartamento(departamentoSimples);
+        }
+
+        if (dto.getEmpresaId() != null) {
+            com.cosmo.cosmo.entity.Empresa empresaEntity = empresaService.findEntityById(dto.getEmpresaId());
+            com.cosmo.cosmo.dto.EmpresaResponseDTO empresaSimples = new com.cosmo.cosmo.dto.EmpresaResponseDTO();
+            empresaSimples.setId(empresaEntity.getId());
+            empresaSimples.setNome(empresaEntity.getNome());
+            dto.setEmpresa(empresaSimples);
+        }
+
+        return dto;
     }
 }

@@ -1,6 +1,8 @@
 package com.cosmo.cosmo.repository;
 
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +28,10 @@ public interface EquipamentoRepository extends JpaRepository<Equipamento, Long> 
     // Buscar equipamentos por tipo específico usando discriminator
     @Query("SELECT e FROM Equipamento e WHERE TYPE(e) = :tipo")
     List<Equipamento> findByTipo(@Param("tipo") Class<? extends Equipamento> tipo);
+
+    // Buscar equipamentos por tipo específico com paginação
+    @Query("SELECT e FROM Equipamento e WHERE TYPE(e) = :tipo")
+    Page<Equipamento> findByTipo(@Param("tipo") Class<? extends Equipamento> tipo, Pageable pageable);
 
     // Contar equipamentos por tipo
     @Query("SELECT COUNT(e) FROM Equipamento e WHERE TYPE(e) = :tipo")

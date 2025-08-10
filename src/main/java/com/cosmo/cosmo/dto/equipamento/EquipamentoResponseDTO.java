@@ -1,5 +1,7 @@
 package com.cosmo.cosmo.dto.equipamento;
 
+import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.EmpresaResponseDTO;
 import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.enums.StatusPropriedade;
@@ -41,4 +43,8 @@ public class EquipamentoResponseDTO extends RepresentationModel<EquipamentoRespo
 
     // Campo para conter os detalhes específicos do equipamento
     private Object details;
+
+    // Objetos aninhados para HATEOAS
+    private DepartamentoResponseDTO departamento;
+    private EmpresaResponseDTO empresa;
 }
