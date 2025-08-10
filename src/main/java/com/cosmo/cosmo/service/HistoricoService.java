@@ -13,10 +13,14 @@ import com.cosmo.cosmo.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -35,6 +39,101 @@ public class HistoricoService {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    public PagedResponseDTO<HistoricoResponseDTO> findAll(Pageable pageable) {
+        Page<Historico> page = historicoRepository.findAll(pageable);
+
+        List<HistoricoResponseDTO> historicos = page.getContent()
+                .stream()
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinksWithNestedEntities(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<HistoricoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("historicos", historicos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<HistoricoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinks(response, pageable, page);
+
+        return response;
+    }
+
+    public PagedResponseDTO<HistoricoResponseDTO> findByUsuarioId(Long usuarioId, Pageable pageable) {
+        Page<Historico> page = historicoRepository.findByUsuarioId(usuarioId, pageable);
+
+        List<HistoricoResponseDTO> historicos = page.getContent()
+                .stream()
+                .filter(h -> h.getStatusRegistroHistorico()) // Só históricos ativos
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinksWithNestedEntities(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<HistoricoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("historicos", historicos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<HistoricoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL específicos para usuário
+        addPaginationLinksByUsuario(response, pageable, page, usuarioId);
+
+        return response;
+    }
+
+    public PagedResponseDTO<HistoricoResponseDTO> findByEquipamentoId(Long equipamentoId, Pageable pageable) {
+        Page<Historico> page = historicoRepository.findByEquipamentoId(equipamentoId, pageable);
+
+        List<HistoricoResponseDTO> historicos = page.getContent()
+                .stream()
+                .filter(h -> h.getStatusRegistroHistorico()) // Só históricos ativos
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinksWithNestedEntities(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<HistoricoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("historicos", historicos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<HistoricoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL específicos para equipamento
+        addPaginationLinksByEquipamento(response, pageable, page, equipamentoId);
+
+        return response;
+    }
 
     public List<HistoricoResponseDTO> findAll() {
         return historicoRepository.findAll()
@@ -464,7 +563,8 @@ public class HistoricoService {
         dto.add(linkTo(methodOn(HistoricoController.class).getHistoricoById(id)).withSelfRel());
 
         // Link para listar todos os históricos
-        dto.add(linkTo(methodOn(HistoricoController.class).getAllHistoricos()).withRel("historicos"));
+        dto.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(0, 10, "id", "desc")).withRel("historicos"));
 
         // Links baseados no estado do histórico
         if (dto.getStatusRegistroHistorico()) {
@@ -478,7 +578,6 @@ public class HistoricoService {
             }
         }
 
-
         // Links para operações múltiplas
         dto.add(linkTo(methodOn(HistoricoController.class).entregarMultiplosEquipamentos(null)).withRel("entrega-multipla"));
         dto.add(linkTo(methodOn(HistoricoController.class).devolverMultiplosEquipamentos(null)).withRel("devolucao-multipla"));
@@ -488,7 +587,8 @@ public class HistoricoService {
 
     private OperacaoMultiplaResponseDTO addHateoasLinksToOperacaoMultipla(OperacaoMultiplaResponseDTO dto, String tipoOperacao) {
         // Link para listar todos os históricos
-        dto.add(linkTo(methodOn(HistoricoController.class).getAllHistoricos()).withRel("historicos"));
+        dto.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(0, 10, "id", "desc")).withRel("historicos"));
 
         // Links para operações múltiplas
         dto.add(linkTo(methodOn(HistoricoController.class).entregarMultiplosEquipamentos(null)).withRel("entrega-multipla"));
@@ -502,5 +602,122 @@ public class HistoricoService {
         }
 
         return dto;
+    }
+
+    private HistoricoResponseDTO addHateoasLinksWithNestedEntities(HistoricoResponseDTO dto) {
+        // Adicionar links HATEOAS para o histórico principal
+        addHateoasLinks(dto);
+
+        // O DTO já vem com os objetos completos do mapper, não precisamos recriar
+        // Apenas garantir que tenham os links HATEOAS se necessário
+
+        return dto;
+    }
+
+    private void addPaginationLinks(PagedResponseDTO<HistoricoResponseDTO> response, Pageable pageable, Page<?> page) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ? 
+            pageable.getSort().iterator().next().getProperty() : "id";
+        String sortDir = pageable.getSort().iterator().hasNext() ? 
+            (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "desc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .getAllHistoricos(currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .getAllHistoricos(currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+    }
+
+    private void addPaginationLinksByUsuario(PagedResponseDTO<HistoricoResponseDTO> response, Pageable pageable, Page<?> page, Long usuarioId) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ? 
+            pageable.getSort().iterator().next().getProperty() : "dataEntrega";
+        String sortDir = pageable.getSort().iterator().hasNext() ? 
+            (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "desc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getHistoricosByUsuario(usuarioId, currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getHistoricosByUsuario(usuarioId, 0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getHistoricosByUsuario(usuarioId, page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .getHistoricosByUsuario(usuarioId, currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .getHistoricosByUsuario(usuarioId, currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+
+        // Link para todos os históricos
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(0, 10, "id", "desc")).withRel("todos-historicos"));
+    }
+
+    private void addPaginationLinksByEquipamento(PagedResponseDTO<HistoricoResponseDTO> response, Pageable pageable, Page<?> page, Long equipamentoId) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+            pageable.getSort().iterator().next().getProperty() : "dataEntrega";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+            (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "desc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getHistoricosByEquipamento(equipamentoId, currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getHistoricosByEquipamento(equipamentoId, 0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getHistoricosByEquipamento(equipamentoId, page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .getHistoricosByEquipamento(equipamentoId, currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .getHistoricosByEquipamento(equipamentoId, currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+
+        // Link para todos os históricos
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(0, 10, "id", "desc")).withRel("todos-historicos"));
     }
 }

@@ -4,6 +4,9 @@ import com.cosmo.cosmo.dto.*;
 import com.cosmo.cosmo.service.HistoricoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +21,21 @@ public class HistoricoController {
     @Autowired
     private HistoricoService historicoService;
 
-    // ==================== MÉTODOS CRUD BÁSICOS ====================
+    // ==================== MÉTODOS CRUD BÁSICOS COM PAGINAÇÃO ====================
 
     @GetMapping
-    public ResponseEntity<List<HistoricoResponseDTO>> getAllHistoricos() {
-        List<HistoricoResponseDTO> historicos = historicoService.findAll();
+    public ResponseEntity<PagedResponseDTO<HistoricoResponseDTO>> getAllHistoricos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<HistoricoResponseDTO> historicos = historicoService.findAll(pageable);
         return ResponseEntity.ok(historicos);
     }
 
@@ -97,23 +110,45 @@ public class HistoricoController {
         return ResponseEntity.ok(historico);
     }
 
-    // ==================== MÉTODOS DE CONSULTA ====================
+    // ==================== MÉTODOS DE CONSULTA COM PAGINAÇÃO ====================
 
     /**
-     * Busca históricos por usuário (apenas ativos)
+     * Busca históricos por usuário (apenas ativos) com paginação
      */
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<HistoricoResponseDTO>> getHistoricosByUsuario(@PathVariable Long usuarioId) {
-        List<HistoricoResponseDTO> historicos = historicoService.findByUsuarioId(usuarioId);
+    public ResponseEntity<PagedResponseDTO<HistoricoResponseDTO>> getHistoricosByUsuario(
+            @PathVariable Long usuarioId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "dataEntrega") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<HistoricoResponseDTO> historicos = historicoService.findByUsuarioId(usuarioId, pageable);
         return ResponseEntity.ok(historicos);
     }
 
     /**
-     * Busca históricos por equipamento (apenas ativos)
+     * Busca históricos por equipamento (apenas ativos) com paginação
      */
     @GetMapping("/equipamento/{equipamentoId}")
-    public ResponseEntity<List<HistoricoResponseDTO>> getHistoricosByEquipamento(@PathVariable Long equipamentoId) {
-        List<HistoricoResponseDTO> historicos = historicoService.findByEquipamentoId(equipamentoId);
+    public ResponseEntity<PagedResponseDTO<HistoricoResponseDTO>> getHistoricosByEquipamento(
+            @PathVariable Long equipamentoId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "dataEntrega") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<HistoricoResponseDTO> historicos = historicoService.findByEquipamentoId(equipamentoId, pageable);
         return ResponseEntity.ok(historicos);
     }
 
