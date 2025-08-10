@@ -2,9 +2,13 @@ package com.cosmo.cosmo.controller;
 
 import com.cosmo.cosmo.dto.EmpresaRequestDTO;
 import com.cosmo.cosmo.dto.EmpresaResponseDTO;
+import com.cosmo.cosmo.dto.PagedResponseDTO;
 import com.cosmo.cosmo.service.EmpresaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +24,18 @@ public class EmpresaController {
     private EmpresaService empresaService;
 
     @GetMapping
-    public ResponseEntity<List<EmpresaResponseDTO>> getAllEmpresas() {
-        List<EmpresaResponseDTO> empresas = empresaService.findAll();
+    public ResponseEntity<PagedResponseDTO<EmpresaResponseDTO>> getAllEmpresas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<EmpresaResponseDTO> empresas = empresaService.findAll(pageable);
         return ResponseEntity.ok(empresas);
     }
 

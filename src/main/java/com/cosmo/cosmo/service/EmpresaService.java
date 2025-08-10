@@ -3,14 +3,19 @@ package com.cosmo.cosmo.service;
 import com.cosmo.cosmo.controller.EmpresaController;
 import com.cosmo.cosmo.dto.EmpresaRequestDTO;
 import com.cosmo.cosmo.dto.EmpresaResponseDTO;
+import com.cosmo.cosmo.dto.PagedResponseDTO;
 import com.cosmo.cosmo.entity.Empresa;
 import com.cosmo.cosmo.mapper.EmpresaMapper;
 import com.cosmo.cosmo.repository.EmpresaRepository;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -24,14 +29,35 @@ public class EmpresaService {
     @Autowired
     private EmpresaMapper empresaMapper;
 
-    public List<EmpresaResponseDTO> findAll() {
-        return empresaRepository.findAll()
+    public PagedResponseDTO<EmpresaResponseDTO> findAll(Pageable pageable) {
+        Page<Empresa> page = empresaRepository.findAll(pageable);
+
+        List<EmpresaResponseDTO> empresas = page.getContent()
                 .stream()
                 .map(empresa -> {
                     EmpresaResponseDTO dto = empresaMapper.toResponseDTO(empresa);
                     return addHateoasLinks(dto);
                 })
                 .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<EmpresaResponseDTO>> embedded = new HashMap<>();
+        embedded.put("empresas", empresas);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<EmpresaResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinks(response, pageable, page);
+
+        return response;
     }
 
     public EmpresaResponseDTO findById(Long id) {
@@ -77,7 +103,8 @@ public class EmpresaService {
         dto.add(linkTo(methodOn(EmpresaController.class).getEmpresaById(id)).withSelfRel());
 
         // Link para listar todas as empresas
-        dto.add(linkTo(methodOn(EmpresaController.class).getAllEmpresas()).withRel("empresas"));
+        dto.add(linkTo(methodOn(EmpresaController.class)
+                .getAllEmpresas(0, 10, "nome", "asc")).withRel("empresas"));
 
         // Link para atualizar
         dto.add(linkTo(methodOn(EmpresaController.class).updateEmpresa(id, null)).withRel("update"));
@@ -86,5 +113,38 @@ public class EmpresaService {
         dto.add(linkTo(methodOn(EmpresaController.class).deleteEmpresa(id)).withRel("delete"));
 
         return dto;
+    }
+
+    private void addPaginationLinks(PagedResponseDTO<EmpresaResponseDTO> response, Pageable pageable, Page<?> page) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+                pageable.getSort().iterator().next().getProperty() : "nome";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+                (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "asc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(EmpresaController.class)
+                .getAllEmpresas(currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(EmpresaController.class)
+                .getAllEmpresas(0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(EmpresaController.class)
+                .getAllEmpresas(page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(EmpresaController.class)
+                    .getAllEmpresas(currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(EmpresaController.class)
+                    .getAllEmpresas(currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
     }
 }

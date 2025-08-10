@@ -20,4 +20,3 @@ spring:
     baseline-version: 0
     locations: classpath:db/migration
 
-
