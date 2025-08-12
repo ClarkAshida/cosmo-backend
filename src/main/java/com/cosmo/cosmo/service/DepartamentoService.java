@@ -1,9 +1,9 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.DepartamentoController;
-import com.cosmo.cosmo.dto.DepartamentoRequestDTO;
-import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
-import com.cosmo.cosmo.dto.PagedResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoRequestDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
 import com.cosmo.cosmo.entity.Departamento;
 import com.cosmo.cosmo.mapper.DepartamentoMapper;
 import com.cosmo.cosmo.repository.DepartamentoRepository;

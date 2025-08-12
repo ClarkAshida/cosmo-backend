@@ -1,7 +1,9 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.EquipamentoController;
-import com.cosmo.cosmo.dto.PagedResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.empresa.EmpresaResponseDTO;
 import com.cosmo.cosmo.dto.equipamento.*;
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Empresa;
@@ -591,7 +593,7 @@ public class EquipamentoService {
         // Criar objetos simples de departamento e empresa com apenas ID e nome
         if (dto.getDepartamentoId() != null) {
             Departamento departamentoEntity = departamentoService.findEntityById(dto.getDepartamentoId());
-            com.cosmo.cosmo.dto.DepartamentoResponseDTO departamentoSimples = new com.cosmo.cosmo.dto.DepartamentoResponseDTO();
+            DepartamentoResponseDTO departamentoSimples = new DepartamentoResponseDTO();
             departamentoSimples.setId(departamentoEntity.getId());
             departamentoSimples.setNome(departamentoEntity.getNome());
             dto.setDepartamento(departamentoSimples);
@@ -599,7 +601,7 @@ public class EquipamentoService {
 
         if (dto.getEmpresaId() != null) {
             com.cosmo.cosmo.entity.Empresa empresaEntity = empresaService.findEntityById(dto.getEmpresaId());
-            com.cosmo.cosmo.dto.EmpresaResponseDTO empresaSimples = new com.cosmo.cosmo.dto.EmpresaResponseDTO();
+            EmpresaResponseDTO empresaSimples = new EmpresaResponseDTO();
             empresaSimples.setId(empresaEntity.getId());
             empresaSimples.setNome(empresaEntity.getNome());
             dto.setEmpresa(empresaSimples);

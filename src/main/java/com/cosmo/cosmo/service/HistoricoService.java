@@ -1,7 +1,8 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.HistoricoController;
-import com.cosmo.cosmo.dto.*;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
+import com.cosmo.cosmo.dto.historico.*;
 import com.cosmo.cosmo.entity.Historico;
 import com.cosmo.cosmo.entity.equipamento.Equipamento;
 import com.cosmo.cosmo.entity.Usuario;

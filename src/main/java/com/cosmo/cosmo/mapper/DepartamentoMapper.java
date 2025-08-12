@@ -1,7 +1,7 @@
 package com.cosmo.cosmo.mapper;
 
-import com.cosmo.cosmo.dto.DepartamentoRequestDTO;
-import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoRequestDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
 import com.cosmo.cosmo.entity.Departamento;
 import org.springframework.stereotype.Component;
 

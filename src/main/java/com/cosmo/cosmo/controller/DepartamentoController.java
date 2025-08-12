@@ -1,8 +1,8 @@
 package com.cosmo.cosmo.controller;
 
-import com.cosmo.cosmo.dto.DepartamentoRequestDTO;
-import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
-import com.cosmo.cosmo.dto.PagedResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoRequestDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
 import com.cosmo.cosmo.service.DepartamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/departamentos")

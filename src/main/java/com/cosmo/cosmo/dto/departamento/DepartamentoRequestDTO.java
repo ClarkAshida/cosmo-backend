@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.departamento;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmpresaRequestDTO {
+public class DepartamentoRequestDTO {
 
-    @NotBlank(message = "Nome da empresa é obrigatório")
+    @NotBlank(message = "Nome do departamento é obrigatório")
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
-
-    @NotBlank(message = "Estado é obrigatório")
-    @Size(min = 2, max = 10, message = "Estado deve ter no mínimo 2 caracteres")
-    private String estado;
 }

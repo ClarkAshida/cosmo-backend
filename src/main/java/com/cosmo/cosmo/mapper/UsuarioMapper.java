@@ -1,7 +1,7 @@
 package com.cosmo.cosmo.mapper;
 
-import com.cosmo.cosmo.dto.UsuarioRequestDTO;
-import com.cosmo.cosmo.dto.UsuarioResponseDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioRequestDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioResponseDTO;
 import com.cosmo.cosmo.entity.Usuario;
 import com.cosmo.cosmo.entity.Departamento;
 import com.cosmo.cosmo.entity.Empresa;

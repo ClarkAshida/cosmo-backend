@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.usuario;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

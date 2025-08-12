@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.equipamento;
 
 import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;

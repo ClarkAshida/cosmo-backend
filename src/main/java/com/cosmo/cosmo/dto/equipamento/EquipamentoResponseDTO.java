@@ -1,7 +1,7 @@
 package com.cosmo.cosmo.dto.equipamento;
 
-import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
-import com.cosmo.cosmo.dto.EmpresaResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.empresa.EmpresaResponseDTO;
 import com.cosmo.cosmo.enums.EstadoConservacao;
 import com.cosmo.cosmo.enums.StatusEquipamento;
 import com.cosmo.cosmo.enums.StatusPropriedade;

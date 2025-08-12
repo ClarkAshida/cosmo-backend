@@ -1,11 +1,11 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.UsuarioController;
-import com.cosmo.cosmo.dto.PagedResponseDTO;
-import com.cosmo.cosmo.dto.UsuarioRequestDTO;
-import com.cosmo.cosmo.dto.UsuarioResponseDTO;
-import com.cosmo.cosmo.dto.DepartamentoResponseDTO;
-import com.cosmo.cosmo.dto.EmpresaResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioRequestDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.empresa.EmpresaResponseDTO;
 import com.cosmo.cosmo.entity.Usuario;
 import com.cosmo.cosmo.entity.Departamento;
 import com.cosmo.cosmo.entity.Empresa;

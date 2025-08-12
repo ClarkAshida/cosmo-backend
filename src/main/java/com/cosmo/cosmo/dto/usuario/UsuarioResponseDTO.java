@@ -1,5 +1,7 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.usuario;
 
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
+import com.cosmo.cosmo.dto.empresa.EmpresaResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

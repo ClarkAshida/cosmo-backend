@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.historico;
 
 import com.cosmo.cosmo.enums.StatusEquipamento;
 import jakarta.validation.constraints.Size;

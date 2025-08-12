@@ -1,18 +1,21 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.historico;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EntregaEquipamentoDTO {
+public class EntregaMultiplaDTO {
 
-    @NotNull(message = "ID do equipamento é obrigatório")
-    private Long equipamentoId;
+    @NotEmpty(message = "Lista de equipamentos não pode estar vazia")
+    private List<Long> equipamentoIds;
 
     @NotNull(message = "ID do usuário é obrigatório")
     private Long usuarioId;

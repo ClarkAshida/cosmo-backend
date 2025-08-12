@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.geral;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

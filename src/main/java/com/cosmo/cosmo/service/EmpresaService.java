@@ -1,9 +1,9 @@
 package com.cosmo.cosmo.service;
 
 import com.cosmo.cosmo.controller.EmpresaController;
-import com.cosmo.cosmo.dto.EmpresaRequestDTO;
-import com.cosmo.cosmo.dto.EmpresaResponseDTO;
-import com.cosmo.cosmo.dto.PagedResponseDTO;
+import com.cosmo.cosmo.dto.empresa.EmpresaRequestDTO;
+import com.cosmo.cosmo.dto.empresa.EmpresaResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
 import com.cosmo.cosmo.entity.Empresa;
 import com.cosmo.cosmo.mapper.EmpresaMapper;
 import com.cosmo.cosmo.repository.EmpresaRepository;

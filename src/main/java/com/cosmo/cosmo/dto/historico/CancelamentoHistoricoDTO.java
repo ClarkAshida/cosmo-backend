@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.historico;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

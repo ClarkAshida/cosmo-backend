@@ -1,6 +1,7 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.historico;
 
 import com.cosmo.cosmo.dto.equipamento.EquipamentoResponseDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioResponseDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;

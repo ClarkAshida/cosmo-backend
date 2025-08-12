@@ -1,8 +1,8 @@
 package com.cosmo.cosmo.controller;
 
-import com.cosmo.cosmo.dto.PagedResponseDTO;
-import com.cosmo.cosmo.dto.UsuarioRequestDTO;
-import com.cosmo.cosmo.dto.UsuarioResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioRequestDTO;
+import com.cosmo.cosmo.dto.usuario.UsuarioResponseDTO;
 import com.cosmo.cosmo.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

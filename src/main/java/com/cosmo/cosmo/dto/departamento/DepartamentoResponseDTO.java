@@ -1,4 +1,4 @@
-package com.cosmo.cosmo.dto;
+package com.cosmo.cosmo.dto.departamento;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

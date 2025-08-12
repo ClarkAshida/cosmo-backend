@@ -1,6 +1,6 @@
 package com.cosmo.cosmo.controller;
 
-import com.cosmo.cosmo.dto.PagedResponseDTO;
+import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
 import com.cosmo.cosmo.dto.equipamento.*;
 import com.cosmo.cosmo.enums.TipoEquipamento;
 import com.cosmo.cosmo.service.EquipamentoService;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/equipamentos")
