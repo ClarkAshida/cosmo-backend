@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/empresas")
 @CrossOrigin(origins = "*")
@@ -61,5 +63,22 @@ public class EmpresaController {
     public ResponseEntity<Void> deleteEmpresa(@PathVariable Long id) {
         empresaService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<PagedResponseDTO<EmpresaResponseDTO>> filtrarEmpresas(
+            @RequestParam(required = false) String nome,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<EmpresaResponseDTO> empresas = empresaService.filtrarEmpresas(nome, pageable);
+        return ResponseEntity.ok(empresas);
     }
 }

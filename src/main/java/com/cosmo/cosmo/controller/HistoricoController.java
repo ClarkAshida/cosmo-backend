@@ -10,7 +10,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/historicos")
@@ -204,20 +208,33 @@ public class HistoricoController {
     @PatchMapping("/devolver-multiplos")
     public ResponseEntity<OperacaoMultiplaResponseDTO> devolverMultiplosEquipamentos(
             @Valid @RequestBody DevolucaoMultiplaDTO devolucaoMultiplaDTO) {
-
         OperacaoMultiplaResponseDTO resultado = historicoService.devolverMultiplosEquipamentos(devolucaoMultiplaDTO);
-
-        // Se todos falharam, retorna BAD_REQUEST
-        if (resultado.getItensSucesso() == 0) {
-            return ResponseEntity.badRequest().body(resultado);
-        }
-
-        // Se alguns falharam, retorna PARTIAL_CONTENT (207)
-        if (resultado.getItensErro() > 0) {
-            return ResponseEntity.status(207).body(resultado); // 207 Multi-Status
-        }
-
-        // Se todos tiveram sucesso, retorna OK
         return ResponseEntity.ok(resultado);
+    }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<PagedResponseDTO<HistoricoResponseDTO>> filtrarHistoricos(
+            @RequestParam(required = false) Long usuarioId,
+            @RequestParam(required = false) Long equipamentoId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataEntregaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataEntregaFim,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDevolucaoInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDevolucaoFim,
+            @RequestParam(required = false) String statusRegistroHistorico,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<HistoricoResponseDTO> historicos = historicoService.filtrarHistoricos(
+                usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+                dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico, pageable
+        );
+        return ResponseEntity.ok(historicos);
     }
 }

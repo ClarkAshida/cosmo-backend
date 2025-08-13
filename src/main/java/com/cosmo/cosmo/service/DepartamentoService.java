@@ -7,10 +7,12 @@ import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
 import com.cosmo.cosmo.entity.Departamento;
 import com.cosmo.cosmo.mapper.DepartamentoMapper;
 import com.cosmo.cosmo.repository.DepartamentoRepository;
+import com.cosmo.cosmo.specification.DepartamentoSpecification;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -96,6 +98,38 @@ public class DepartamentoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento não encontrado com id: " + id));
     }
 
+    public PagedResponseDTO<DepartamentoResponseDTO> filtrarDepartamentos(String nome, Pageable pageable) {
+        Specification<Departamento> spec = DepartamentoSpecification.comFiltros(nome);
+        Page<Departamento> page = departamentoRepository.findAll(spec, pageable);
+
+        List<DepartamentoResponseDTO> departamentos = page.getContent()
+                .stream()
+                .map(departamento -> {
+                    DepartamentoResponseDTO dto = departamentoMapper.toResponseDTO(departamento);
+                    return addHateoasLinks(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<DepartamentoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("departamentos", departamentos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<DepartamentoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinksForFiltro(response, pageable, page, nome);
+
+        return response;
+    }
+
     private DepartamentoResponseDTO addHateoasLinks(DepartamentoResponseDTO dto) {
         Long id = dto.getId();
 
@@ -146,5 +180,42 @@ public class DepartamentoService {
             response.add(linkTo(methodOn(DepartamentoController.class)
                     .getAllDepartamentos(currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
         }
+    }
+
+    private void addPaginationLinksForFiltro(PagedResponseDTO<DepartamentoResponseDTO> response, Pageable pageable, Page<?> page, String nome) {
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+                pageable.getSort().iterator().next().getProperty() : "nome";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+                (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "asc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(DepartamentoController.class)
+                .filtrarDepartamentos(nome, currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(DepartamentoController.class)
+                .filtrarDepartamentos(nome, 0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(DepartamentoController.class)
+                .filtrarDepartamentos(nome, page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(DepartamentoController.class)
+                    .filtrarDepartamentos(nome, currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(DepartamentoController.class)
+                    .filtrarDepartamentos(nome, currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+
+        // Link para todos os departamentos
+        response.add(linkTo(methodOn(DepartamentoController.class)
+                .getAllDepartamentos(0, 10, "nome", "asc")).withRel("todos-departamentos"));
     }
 }

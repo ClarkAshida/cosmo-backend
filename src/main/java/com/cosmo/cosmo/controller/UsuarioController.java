@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/usuarios")
 @CrossOrigin(origins = "*")
@@ -63,9 +65,28 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/reativar")
+    @PutMapping("/{id}/reativar")
     public ResponseEntity<UsuarioResponseDTO> reativarUsuario(@PathVariable Long id) {
         UsuarioResponseDTO usuario = usuarioService.reactivateById(id);
         return ResponseEntity.ok(usuario);
+    }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<PagedResponseDTO<UsuarioResponseDTO>> filtrarUsuarios(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String cpf,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<UsuarioResponseDTO> usuarios = usuarioService.filtrarUsuarios(nome, email, cpf, pageable);
+        return ResponseEntity.ok(usuarios);
     }
 }

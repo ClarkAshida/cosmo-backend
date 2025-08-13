@@ -11,13 +11,16 @@ import com.cosmo.cosmo.mapper.HistoricoMapper;
 import com.cosmo.cosmo.repository.HistoricoRepository;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.ValidationException;
+import com.cosmo.cosmo.specification.HistoricoSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -715,6 +718,108 @@ public class HistoricoService {
         if (page.hasNext()) {
             response.add(linkTo(methodOn(HistoricoController.class)
                     .getHistoricosByEquipamento(equipamentoId, currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+
+        // Link para todos os históricos
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .getAllHistoricos(0, 10, "id", "desc")).withRel("todos-historicos"));
+    }
+
+    // Método auxiliar para outros services
+    public Historico findEntityById(Long id) {
+        return historicoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Histórico não encontrado com id: " + id));
+    }
+
+    public PagedResponseDTO<HistoricoResponseDTO> filtrarHistoricos(
+            Long usuarioId,
+            Long equipamentoId,
+            LocalDate dataEntregaInicio,
+            LocalDate dataEntregaFim,
+            LocalDate dataDevolucaoInicio,
+            LocalDate dataDevolucaoFim,
+            String statusRegistroHistorico,
+            Pageable pageable) {
+
+        Specification<Historico> spec = HistoricoSpecification.comFiltros(
+            usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+            dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico
+        );
+
+        Page<Historico> page = historicoRepository.findAll(spec, pageable);
+
+        List<HistoricoResponseDTO> historicos = page.getContent()
+                .stream()
+                .map(historico -> {
+                    HistoricoResponseDTO dto = historicoMapper.toResponseDTO(historico);
+                    return addHateoasLinks(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<HistoricoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("historicos", historicos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<HistoricoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinksForFiltro(response, pageable, page, usuarioId, equipamentoId,
+            dataEntregaInicio, dataEntregaFim, dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico);
+
+        return response;
+    }
+
+    private void addPaginationLinksForFiltro(PagedResponseDTO<HistoricoResponseDTO> response, Pageable pageable, Page<?> page,
+            Long usuarioId, Long equipamentoId, LocalDate dataEntregaInicio, LocalDate dataEntregaFim,
+            LocalDate dataDevolucaoInicio, LocalDate dataDevolucaoFim, String statusRegistroHistorico) {
+
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+                pageable.getSort().iterator().next().getProperty() : "id";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+                (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "desc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .filtrarHistoricos(usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+                    dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico,
+                    currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .filtrarHistoricos(usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+                    dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico,
+                    0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(HistoricoController.class)
+                .filtrarHistoricos(usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+                    dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico,
+                    page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .filtrarHistoricos(usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+                        dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico,
+                        currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(HistoricoController.class)
+                    .filtrarHistoricos(usuarioId, equipamentoId, dataEntregaInicio, dataEntregaFim,
+                        dataDevolucaoInicio, dataDevolucaoFim, statusRegistroHistorico,
+                        currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
         }
 
         // Link para todos os históricos

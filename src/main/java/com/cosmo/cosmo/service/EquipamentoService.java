@@ -15,9 +15,11 @@ import com.cosmo.cosmo.repository.EquipamentoRepository;
 import com.cosmo.cosmo.repository.equipamento.EquipamentoRepositoryFactory;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.DuplicateResourceException;
+import com.cosmo.cosmo.specification.EquipamentoSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -285,6 +287,54 @@ public class EquipamentoService {
     public Equipamento findEntityById(Long id) {
         return equipamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com id: " + id));
+    }
+
+    public PagedResponseDTO<EquipamentoResponseDTO> filtrarEquipamentos(
+            String serialNumber,
+            String numeroPatrimonio,
+            String marca,
+            String modelo,
+            String estadoConservacao,
+            String status,
+            Boolean termoResponsabilidade,
+            String notaFiscal,
+            String statusPropriedade,
+            Pageable pageable) {
+
+        Specification<Equipamento> spec = EquipamentoSpecification.comFiltros(
+            serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+            status, termoResponsabilidade, notaFiscal, statusPropriedade
+        );
+
+        Page<Equipamento> page = equipamentoRepository.findAll(spec, pageable);
+
+        List<EquipamentoResponseDTO> equipamentos = page.getContent()
+                .stream()
+                .map(equipamento -> {
+                    EquipamentoResponseDTO dto = equipamentoMapper.toResponseDTO(equipamento);
+                    return addHateoasLinksWithNestedEntities(dto);
+                })
+                .collect(Collectors.toList());
+
+        // Criar o embedded map
+        Map<String, List<EquipamentoResponseDTO>> embedded = new HashMap<>();
+        embedded.put("equipamentos", equipamentos);
+
+        // Criar informações da página
+        PagedResponseDTO.PageInfo pageInfo = new PagedResponseDTO.PageInfo(
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber()
+        );
+
+        PagedResponseDTO<EquipamentoResponseDTO> response = new PagedResponseDTO<>(embedded, pageInfo);
+
+        // Adicionar links de navegação HAL
+        addPaginationLinksForFiltro(response, pageable, page, serialNumber, numeroPatrimonio,
+            marca, modelo, estadoConservacao, status, termoResponsabilidade, notaFiscal, statusPropriedade);
+
+        return response;
     }
 
     /**
@@ -584,6 +634,56 @@ public class EquipamentoService {
         // Link para todos os equipamentos
         response.add(linkTo(methodOn(EquipamentoController.class)
                 .findAll(0, 10, "marca", "asc")).withRel("todos-equipamentos"));
+    }
+
+    private void addPaginationLinksForFiltro(PagedResponseDTO<EquipamentoResponseDTO> response, Pageable pageable, Page<?> page,
+            String serialNumber, String numeroPatrimonio, String marca, String modelo, String estadoConservacao,
+            String status, Boolean termoResponsabilidade, String notaFiscal, String statusPropriedade) {
+
+        int currentPage = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortBy = pageable.getSort().iterator().hasNext() ?
+                pageable.getSort().iterator().next().getProperty() : "id";
+        String sortDir = pageable.getSort().iterator().hasNext() ?
+                (pageable.getSort().iterator().next().isAscending() ? "asc" : "desc") : "asc";
+
+        // Link para a página atual (self)
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .filtrarEquipamentos(serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+                    status, termoResponsabilidade, notaFiscal, statusPropriedade,
+                    currentPage, pageSize, sortBy, sortDir)).withSelfRel());
+
+        // Link para primeira página
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .filtrarEquipamentos(serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+                    status, termoResponsabilidade, notaFiscal, statusPropriedade,
+                    0, pageSize, sortBy, sortDir)).withRel("first"));
+
+        // Link para última página
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .filtrarEquipamentos(serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+                    status, termoResponsabilidade, notaFiscal, statusPropriedade,
+                    page.getTotalPages() - 1, pageSize, sortBy, sortDir)).withRel("last"));
+
+        // Link para página anterior (se não for a primeira)
+        if (page.hasPrevious()) {
+            response.add(linkTo(methodOn(EquipamentoController.class)
+                    .filtrarEquipamentos(serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+                        status, termoResponsabilidade, notaFiscal, statusPropriedade,
+                        currentPage - 1, pageSize, sortBy, sortDir)).withRel("prev"));
+        }
+
+        // Link para próxima página (se não for a última)
+        if (page.hasNext()) {
+            response.add(linkTo(methodOn(EquipamentoController.class)
+                    .filtrarEquipamentos(serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+                        status, termoResponsabilidade, notaFiscal, statusPropriedade,
+                        currentPage + 1, pageSize, sortBy, sortDir)).withRel("next"));
+        }
+
+        // Link para todos os equipamentos
+        response.add(linkTo(methodOn(EquipamentoController.class)
+                .findAll(0, 10, "id", "asc")).withRel("todos-equipamentos"));
     }
 
     private EquipamentoResponseDTO addHateoasLinksWithNestedEntities(EquipamentoResponseDTO dto) {

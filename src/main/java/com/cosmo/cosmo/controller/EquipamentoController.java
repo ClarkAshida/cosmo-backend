@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/equipamentos")
@@ -221,5 +222,33 @@ public class EquipamentoController {
     public ResponseEntity<Long> countByTipo(@PathVariable TipoEquipamento tipo) {
         Long count = equipamentoService.countByTipo(tipo);
         return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<PagedResponseDTO<EquipamentoResponseDTO>> filtrarEquipamentos(
+            @RequestParam(required = false) String serialNumber,
+            @RequestParam(required = false) String numeroPatrimonio,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String modelo,
+            @RequestParam(required = false) String estadoConservacao,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean termoResponsabilidade,
+            @RequestParam(required = false) String notaFiscal,
+            @RequestParam(required = false) String statusPropriedade,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        PagedResponseDTO<EquipamentoResponseDTO> equipamentos = equipamentoService.filtrarEquipamentos(
+            serialNumber, numeroPatrimonio, marca, modelo, estadoConservacao,
+            status, termoResponsabilidade, notaFiscal, statusPropriedade, pageable
+        );
+        return ResponseEntity.ok(equipamentos);
     }
 }
