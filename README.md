@@ -24,7 +24,7 @@ O sistema controla não apenas o inventário físico, mas também as movimentaç
 
 O backend do Cosmo é construído com as seguintes tecnologias:
 
-* **Java 23**
+* **Java 21**
 * **Spring Boot 3.x**
 * **Spring Web:** Para a construção de APIs RESTful.
 * **Spring Data JPA:** Para a persistência de dados e comunicação com o banco.
