@@ -4,6 +4,8 @@ import com.cosmo.cosmo.exception.ErrorResponse;
 import com.cosmo.cosmo.exception.ResourceNotFoundException;
 import com.cosmo.cosmo.exception.ValidationException;
 import com.cosmo.cosmo.exception.DuplicateResourceException;
+import com.cosmo.cosmo.exception.InvalidJwtAuthenticationException;
+import com.cosmo.cosmo.exception.InvalidCredentialsException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +13,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -106,7 +112,12 @@ public class CustomEntityResponseHandler {
 
             if (causeMessage.contains("duplicate") || causeMessage.contains("unique")) {
                 // Tratamento específico para campos únicos
-                if (causeMessage.contains("hostname")) {
+                if (causeMessage.contains("user_name") || causeMessage.contains("uk_user_name")) {
+                    message = "O nome de usuário informado já está em uso. Cada usuário deve ter um nome único no sistema.";
+                    error = "Nome de usuário duplicado";
+                    details.put("campo", "userName");
+                    details.put("dica", "Escolha um nome de usuário diferente");
+                } else if (causeMessage.contains("hostname")) {
                     message = "O hostname informado já está sendo usado por outro computador. Cada computador deve ter um hostname único na rede.";
                     error = "Hostname duplicado";
                     details.put("campo", "hostname");
@@ -341,6 +352,115 @@ public class CustomEntityResponseHandler {
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handlers para exceções de autenticação
+    @ExceptionHandler(InvalidJwtAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidJwtAuthenticationException(
+            InvalidJwtAuthenticationException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "Token inválido",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("dica", "Faça login novamente para obter um token válido");
+        errorResponse.setDetails(details);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
+            InvalidCredentialsException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Credenciais inválidas",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("dica", "Verifique se o nome de usuário e senha estão corretos");
+        errorResponse.setDetails(details);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(
+            BadCredentialsException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Credenciais incorretas",
+                "Nome de usuário ou senha incorretos",
+                request.getRequestURI()
+        );
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("dica", "Verifique se digitou corretamente o nome de usuário e senha");
+        errorResponse.setDetails(details);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(
+            UsernameNotFoundException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Usuário não encontrado",
+                "Nome de usuário ou senha incorretos",
+                request.getRequestURI()
+        );
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("dica", "Verifique se o nome de usuário está correto");
+        errorResponse.setDetails(details);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorResponse> handleDisabledException(
+            DisabledException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "Conta desabilitada",
+                "Sua conta está desabilitada. Entre em contato com o administrador",
+                request.getRequestURI()
+        );
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("dica", "Entre em contato com o administrador para reativar sua conta");
+        errorResponse.setDetails(details);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ErrorResponse> handleLockedException(
+            LockedException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "Conta bloqueada",
+                "Sua conta está temporariamente bloqueada. Entre em contato com o administrador",
+                request.getRequestURI()
+        );
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("dica", "Aguarde ou entre em contato com o administrador para desbloquear sua conta");
+        errorResponse.setDetails(details);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

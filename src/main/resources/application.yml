@@ -19,4 +19,9 @@ spring:
     baseline-on-migrate: true
     baseline-version: 0
     locations: classpath:db/migration
+  security:
+    jwt:
+      token:
+        secret: 53cr37
+        expiration: 3600000 # 1 hour in milliseconds
 
