@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class DepartamentoController {
     private DepartamentoService departamentoService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PagedResponseDTO<DepartamentoResponseDTO>> getAllDepartamentos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -40,18 +42,21 @@ public class DepartamentoController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DepartamentoResponseDTO> getDepartamentoById(@PathVariable Long id) {
         DepartamentoResponseDTO departamento = departamentoService.findById(id);
         return ResponseEntity.ok(departamento);
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DepartamentoResponseDTO> createDepartamento(@Valid @RequestBody DepartamentoRequestDTO requestDTO) {
         DepartamentoResponseDTO departamento = departamentoService.save(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(departamento);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DepartamentoResponseDTO> updateDepartamento(
             @PathVariable Long id,
             @Valid @RequestBody DepartamentoRequestDTO requestDTO) {
@@ -60,12 +65,14 @@ public class DepartamentoController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteDepartamento(@PathVariable Long id) {
         departamentoService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/filtrar")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PagedResponseDTO<DepartamentoResponseDTO>> filtrarDepartamentos(
             @RequestParam(required = false) String nome,
             @RequestParam(defaultValue = "0") int page,

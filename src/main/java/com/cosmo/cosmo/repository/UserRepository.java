@@ -17,5 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.userName = :userName AND u.enabled = true")
     Optional<User> findByUserNameAndEnabled(@Param("userName") String userName);
 
+    @Query("SELECT u FROM User u WHERE u.refreshToken = :refreshToken")
+    Optional<User> findByRefreshToken(@Param("refreshToken") String refreshToken);
+
     boolean existsByUserName(String userName);
 }

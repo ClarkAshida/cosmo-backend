@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class HistoricoController {
     // ==================== MÉTODOS CRUD BÁSICOS COM PAGINAÇÃO ====================
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<HistoricoResponseDTO>> getAllHistoricos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -43,6 +45,7 @@ public class HistoricoController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<HistoricoResponseDTO> getHistoricoById(@PathVariable Long id) {
         HistoricoResponseDTO historico = historicoService.findById(id);
         return ResponseEntity.ok(historico);
@@ -139,11 +142,12 @@ public class HistoricoController {
      * Busca históricos por equipamento (apenas ativos) com paginação
      */
     @GetMapping("/equipamento/{equipamentoId}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<HistoricoResponseDTO>> getHistoricosByEquipamento(
             @PathVariable Long equipamentoId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "dataEntrega") String sortBy,
+            @RequestParam(defaultValue = "dataMovimentacao") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
         Sort sort = sortDir.equalsIgnoreCase("desc") ?

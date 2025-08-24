@@ -84,16 +84,16 @@ public class UserService implements UserDetailsService {
     @Transactional
     public User save(User user) {
         try {
-            log.debug("Salvando usuário: {}", user.getUserName());
+            log.debug("Salvando usuário: {}", user.getUsername());
 
-            if (user.getId() == null && userRepository.existsByUserName(user.getUserName())) {
-                log.error("Tentativa de criar usuário com userName já existente: {}", user.getUserName());
-                throw new InvalidCredentialsException("Nome de usuário '" + user.getUserName() + "' já existe");
+            if (user.getId() == null && userRepository.existsByUserName(user.getUsername())) {
+                log.error("Tentativa de criar usuário com userName já existente: {}", user.getUsername());
+                throw new InvalidCredentialsException("Nome de usuário '" + user.getUsername() + "' já existe");
             }
 
             // Se a senha foi alterada e não está criptografada, criptografar
             if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
-                log.debug("Criptografando senha para o usuário: {}", user.getUserName());
+                log.debug("Criptografando senha para o usuário: {}", user.getUsername());
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
 
@@ -112,13 +112,13 @@ public class UserService implements UserDetailsService {
             }
 
             User savedUser = userRepository.save(user);
-            log.info("Usuário salvo com sucesso: {}", savedUser.getUserName());
+            log.info("Usuário salvo com sucesso: {}", savedUser.getUsername());
             return savedUser;
 
         } catch (InvalidCredentialsException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Erro ao salvar usuário: {}", user.getUserName(), e);
+            log.error("Erro ao salvar usuário: {}", user.getUsername(), e);
             throw new RuntimeException("Erro ao salvar usuário: " + e.getMessage(), e);
         }
     }
@@ -131,20 +131,20 @@ public class UserService implements UserDetailsService {
             User existingUser = findById(id);
 
             // Verificar se o userName não está sendo usado por outro usuário
-            if (!existingUser.getUserName().equals(user.getUserName()) &&
-                userRepository.existsByUserName(user.getUserName())) {
-                log.error("Tentativa de alterar userName para um já existente: {}", user.getUserName());
-                throw new InvalidCredentialsException("Nome de usuário '" + user.getUserName() + "' já existe");
+            if (!existingUser.getUsername().equals(user.getUsername()) &&
+                userRepository.existsByUserName(user.getUsername())) {
+                log.error("Tentativa de alterar userName para um já existente: {}", user.getUsername());
+                throw new InvalidCredentialsException("Nome de usuário '" + user.getUsername() + "' já existe");
             }
 
             // Atualizar os campos
-            existingUser.setUserName(user.getUserName());
+            existingUser.setUserName(user.getUsername());
             existingUser.setFullName(user.getFullName());
 
             // Se a senha foi alterada, criptografar
             if (user.getPassword() != null && !user.getPassword().isEmpty() &&
                 !user.getPassword().startsWith("$2a$")) {
-                log.debug("Atualizando senha para o usuário: {}", user.getUserName());
+                log.debug("Atualizando senha para o usuário: {}", user.getUsername());
                 existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
 
@@ -168,7 +168,7 @@ public class UserService implements UserDetailsService {
             }
 
             User updatedUser = userRepository.save(existingUser);
-            log.info("Usuário atualizado com sucesso: {}", updatedUser.getUserName());
+            log.info("Usuário atualizado com sucesso: {}", updatedUser.getUsername());
             return updatedUser;
 
         } catch (ResourceNotFoundException | InvalidCredentialsException e) {
@@ -187,7 +187,7 @@ public class UserService implements UserDetailsService {
             User user = findById(id);
 
             userRepository.deleteById(id);
-            log.info("Usuário deletado com sucesso. ID: {}, userName: {}", id, user.getUserName());
+            log.info("Usuário deletado com sucesso. ID: {}, userName: {}", id, user.getUsername());
 
         } catch (ResourceNotFoundException e) {
             throw e;
@@ -208,7 +208,7 @@ public class UserService implements UserDetailsService {
         User user = findById(id);
         user.setEnabled(true);
         User enabledUser = userRepository.save(user);
-        log.info("Usuário habilitado com sucesso: {}", enabledUser.getUserName());
+        log.info("Usuário habilitado com sucesso: {}", enabledUser.getUsername());
         return enabledUser;
     }
 
@@ -218,7 +218,7 @@ public class UserService implements UserDetailsService {
         User user = findById(id);
         user.setEnabled(false);
         User disabledUser = userRepository.save(user);
-        log.info("Usuário desabilitado com sucesso: {}", disabledUser.getUserName());
+        log.info("Usuário desabilitado com sucesso: {}", disabledUser.getUsername());
         return disabledUser;
     }
 
@@ -228,7 +228,7 @@ public class UserService implements UserDetailsService {
         User user = findById(id);
         user.setAccountNonLocked(false);
         User lockedUser = userRepository.save(user);
-        log.info("Usuário bloqueado com sucesso: {}", lockedUser.getUserName());
+        log.info("Usuário bloqueado com sucesso: {}", lockedUser.getUsername());
         return lockedUser;
     }
 
@@ -238,7 +238,7 @@ public class UserService implements UserDetailsService {
         User user = findById(id);
         user.setAccountNonLocked(true);
         User unlockedUser = userRepository.save(user);
-        log.info("Usuário desbloqueado com sucesso: {}", unlockedUser.getUserName());
+        log.info("Usuário desbloqueado com sucesso: {}", unlockedUser.getUsername());
         return unlockedUser;
     }
 }

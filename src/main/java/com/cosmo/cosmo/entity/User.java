@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,12 @@ public class User implements UserDetails {
 
     @Column(name = "enabled")
     private Boolean enabled;
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
+    @Column(name = "refresh_token_expiry_time")
+    private Instant refreshTokenExpiryTime;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

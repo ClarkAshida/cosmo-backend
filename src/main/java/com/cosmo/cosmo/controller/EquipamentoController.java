@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -30,6 +31,7 @@ public class EquipamentoController {
      * Busca todos os equipamentos com paginação e ordenação
      */
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<EquipamentoResponseDTO>> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -50,6 +52,7 @@ public class EquipamentoController {
      * Busca equipamento por ID
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> findById(@PathVariable Long id) {
         EquipamentoResponseDTO equipamento = equipamentoService.findById(id);
         return ResponseEntity.ok(equipamento);
@@ -60,6 +63,7 @@ public class EquipamentoController {
      * Busca equipamentos por tipo específico com paginação
      */
     @GetMapping("/tipo/{tipo}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<EquipamentoResponseDTO>> findByTipo(
             @PathVariable TipoEquipamento tipo,
             @RequestParam(defaultValue = "0") int page,
@@ -83,6 +87,7 @@ public class EquipamentoController {
      * Cria um novo notebook
      */
     @PostMapping("/notebook")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> createNotebook(@Valid @RequestBody NotebookCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createNotebook(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
@@ -93,6 +98,7 @@ public class EquipamentoController {
      * Cria um novo desktop
      */
     @PostMapping("/desktop")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> createDesktop(@Valid @RequestBody DesktopCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createDesktop(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
@@ -103,6 +109,7 @@ public class EquipamentoController {
      * Cria um novo celular
      */
     @PostMapping("/celular")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> createCelular(@Valid @RequestBody CelularCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createCelular(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
@@ -113,6 +120,7 @@ public class EquipamentoController {
      * Cria um novo chip
      */
     @PostMapping("/chip")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> createChip(@Valid @RequestBody ChipCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createChip(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
@@ -123,6 +131,7 @@ public class EquipamentoController {
      * Cria uma nova impressora
      */
     @PostMapping("/impressora")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> createImpressora(@Valid @RequestBody ImpressoraCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createImpressora(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
@@ -133,6 +142,7 @@ public class EquipamentoController {
      * Cria um novo monitor
      */
     @PostMapping("/monitor")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> createMonitor(@Valid @RequestBody MonitorCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createMonitor(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
@@ -145,6 +155,7 @@ public class EquipamentoController {
      * Atualiza um notebook existente
      */
     @PutMapping("/notebook/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> updateNotebook(@PathVariable Long id, @Valid @RequestBody NotebookUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateNotebook(id, updateDTO);
         return ResponseEntity.ok(equipamento);
@@ -155,6 +166,7 @@ public class EquipamentoController {
      * Atualiza um desktop existente
      */
     @PutMapping("/desktop/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> updateDesktop(@PathVariable Long id, @Valid @RequestBody DesktopUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateDesktop(id, updateDTO);
         return ResponseEntity.ok(equipamento);
@@ -165,6 +177,7 @@ public class EquipamentoController {
      * Atualiza um celular existente
      */
     @PutMapping("/celular/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> updateCelular(@PathVariable Long id, @Valid @RequestBody CelularUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateCelular(id, updateDTO);
         return ResponseEntity.ok(equipamento);
@@ -175,6 +188,7 @@ public class EquipamentoController {
      * Atualiza um chip existente
      */
     @PutMapping("/chip/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> updateChip(@PathVariable Long id, @Valid @RequestBody ChipUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateChip(id, updateDTO);
         return ResponseEntity.ok(equipamento);
@@ -185,6 +199,7 @@ public class EquipamentoController {
      * Atualiza uma impressora existente
      */
     @PutMapping("/impressora/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> updateImpressora(@PathVariable Long id, @Valid @RequestBody ImpressoraUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateImpressora(id, updateDTO);
         return ResponseEntity.ok(equipamento);
@@ -195,6 +210,7 @@ public class EquipamentoController {
      * Atualiza um monitor existente
      */
     @PutMapping("/monitor/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<EquipamentoResponseDTO> updateMonitor(@PathVariable Long id, @Valid @RequestBody MonitorUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateMonitor(id, updateDTO);
         return ResponseEntity.ok(equipamento);
@@ -207,6 +223,7 @@ public class EquipamentoController {
      * Exclui um equipamento por ID
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         equipamentoService.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -219,12 +236,14 @@ public class EquipamentoController {
      * Conta equipamentos por tipo
      */
     @GetMapping("/tipo/{tipo}/count")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<Long> countByTipo(@PathVariable TipoEquipamento tipo) {
         Long count = equipamentoService.countByTipo(tipo);
         return ResponseEntity.ok(count);
     }
 
     @GetMapping("/filtrar")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<EquipamentoResponseDTO>> filtrarEquipamentos(
             @RequestParam(required = false) String serialNumber,
             @RequestParam(required = false) String numeroPatrimonio,

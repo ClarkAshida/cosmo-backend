@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class EmpresaController {
     private EmpresaService empresaService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PagedResponseDTO<EmpresaResponseDTO>> getAllEmpresas(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -40,18 +42,21 @@ public class EmpresaController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EmpresaResponseDTO> getEmpresaById(@PathVariable Long id) {
         EmpresaResponseDTO empresa = empresaService.findById(id);
         return ResponseEntity.ok(empresa);
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EmpresaResponseDTO> createEmpresa(@Valid @RequestBody EmpresaRequestDTO requestDTO) {
         EmpresaResponseDTO empresa = empresaService.save(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(empresa);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EmpresaResponseDTO> updateEmpresa(
             @PathVariable Long id,
             @Valid @RequestBody EmpresaRequestDTO requestDTO) {
@@ -60,12 +65,14 @@ public class EmpresaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteEmpresa(@PathVariable Long id) {
         empresaService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/filtrar")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PagedResponseDTO<EmpresaResponseDTO>> filtrarEmpresas(
             @RequestParam(required = false) String nome,
             @RequestParam(defaultValue = "0") int page,

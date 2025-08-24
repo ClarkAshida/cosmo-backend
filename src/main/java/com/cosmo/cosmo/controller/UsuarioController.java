@@ -11,9 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -24,6 +23,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<UsuarioResponseDTO>> getAllUsuarios(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -40,18 +40,21 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<UsuarioResponseDTO> getUsuarioById(@PathVariable Long id) {
         UsuarioResponseDTO usuario = usuarioService.findById(id);
         return ResponseEntity.ok(usuario);
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<UsuarioResponseDTO> createUsuario(@Valid @RequestBody UsuarioRequestDTO requestDTO) {
         UsuarioResponseDTO usuario = usuarioService.save(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<UsuarioResponseDTO> updateUsuario(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioRequestDTO requestDTO) {
@@ -60,6 +63,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<Void> deleteUsuario(@PathVariable Long id) {
         usuarioService.deactivateById(id);
         return ResponseEntity.noContent().build();
@@ -72,6 +76,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/filtrar")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERADOR')")
     public ResponseEntity<PagedResponseDTO<UsuarioResponseDTO>> filtrarUsuarios(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String email,
