@@ -20,3 +20,13 @@ spring:
     baseline-version: 0
     locations: classpath:db/migration
 
+server:
+  port: 8080
+
+security:
+  jwt:
+    token:
+      secret-key: "53cr3t" # Replace with a strong, randomly generated secret
+      expire-length: 3600000 # 1 hour in milliseconds
+      refresh-token:
+        expire-length: 7200000 # 2 hours in milliseconds
