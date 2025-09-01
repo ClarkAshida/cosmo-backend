@@ -5,11 +5,19 @@ import com.cosmo.cosmo.dto.UserResponseDTO;
 import com.cosmo.cosmo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import com.cosmo.cosmo.specification.UserSpecification;
+import com.cosmo.cosmo.entity.User;
 
 @RestController
 @RequestMapping("/api/users")
@@ -18,6 +26,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PagedResourcesAssembler<UserResponseDTO> assembler;
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequest) {
@@ -32,10 +41,23 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        log.info("Retrieving all users");
-        List<UserResponseDTO> users = userService.findAll();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<PagedModel<EntityModel<UserResponseDTO>>> getAllUsers(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "firstName") String sort,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+
+        log.info("Retrieving all users with pagination - page: {}, size: {}, sort: {}, direction: {}",
+                page, size, sort, direction);
+
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Sort sortObj = Sort.by(sortDirection, sort);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<UserResponseDTO> users = userService.findAll(pageable);
+        PagedModel<EntityModel<UserResponseDTO>> pagedModel = assembler.toModel(users);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @GetMapping("/{id}")
@@ -74,5 +96,40 @@ public class UserController {
             log.error("Error deleting user with ID {}: {}", id, exception.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<PagedModel<EntityModel<UserResponseDTO>>> filterUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Boolean enabled,
+            @RequestParam(required = false) Boolean accountNonExpired,
+            @RequestParam(required = false) Boolean accountNonLocked,
+            @RequestParam(required = false) Boolean credentialsNonExpired,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "firstName") String sort,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+
+        log.info("Filtering users with criteria - firstName: {}, lastName: {}, email: {}, enabled: {}",
+                firstName, lastName, email, enabled);
+
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Sort sortObj = Sort.by(sortDirection, sort);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Specification<User> spec = Specification.where(UserSpecification.hasFirstName(firstName))
+                .and(UserSpecification.hasLastName(lastName))
+                .and(UserSpecification.hasEmail(email))
+                .and(UserSpecification.hasEnabled(enabled))
+                .and(UserSpecification.hasAccountNonExpired(accountNonExpired))
+                .and(UserSpecification.hasAccountNonLocked(accountNonLocked))
+                .and(UserSpecification.hasCredentialsNonExpired(credentialsNonExpired));
+
+        Page<UserResponseDTO> users = userService.findAll(spec, pageable);
+        PagedModel<EntityModel<UserResponseDTO>> pagedModel = assembler.toModel(users);
+
+        return ResponseEntity.ok(pagedModel);
     }
 }

@@ -6,6 +6,9 @@ import com.cosmo.cosmo.entity.User;
 import com.cosmo.cosmo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -44,6 +47,20 @@ public class UserService implements UserDetailsService {
             .stream()
             .map(this::mapToResponseDTO)
             .toList();
+    }
+
+    public Page<UserResponseDTO> findAll(Pageable pageable) {
+        log.info("Finding all users with pagination - page: {}, size: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+        return userRepository.findAll(pageable)
+            .map(this::mapToResponseDTO);
+    }
+
+    public Page<UserResponseDTO> findAll(Specification<User> spec, Pageable pageable) {
+        log.info("Finding users with specification and pagination - page: {}, size: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+        return userRepository.findAll(spec, pageable)
+            .map(this::mapToResponseDTO);
     }
 
     public UserResponseDTO create(UserRequestDTO userRequest) {

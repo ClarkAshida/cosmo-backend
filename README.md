@@ -10,6 +10,8 @@ O sistema controla não apenas o inventário físico, mas também as movimentaç
 
 ### ✨ Principais Funcionalidades
 
+- **🔐 Autenticação JWT**: Sistema de login seguro com tokens de acesso e refresh
+- **👥 Gerenciamento de Usuários**: Sistema completo de usuários com perfis e permissões
 - **Gestão Completa de Ativos**: Cadastro e controle de diversos tipos de equipamentos
 - **Sistema de Herança**: Arquitetura orientada a objetos com subclasses específicas para cada tipo de equipamento
 - **Controle de Movimentação**: Histórico completo de entregas e devoluções
@@ -28,19 +30,46 @@ O backend do Cosmo é construído com as seguintes tecnologias:
 * **Spring Boot 3.x**
 * **Spring Web:** Para a construção de APIs RESTful.
 * **Spring Data JPA:** Para a persistência de dados e comunicação com o banco.
+* **Spring Security:** Sistema de segurança com autenticação JWT.
 * **Spring HATEOAS:** Para implementação de links de navegação hipermídia.
 * **JPA Specifications:** Para filtragem dinâmica e segura de dados.
+* **JWT (JSON Web Tokens):** Para autenticação stateless e segura.
 * **MySQL:** Banco de dados relacional para armazenamento dos dados.
 * **Lombok:** Para reduzir código boilerplate em classes Java.
 * **Flyway:** Para controle de versão do banco de dados.
-
-> A implementação de segurança com **Spring Security** está planejada para futuras atualizações.
 
 ![Diagrama do Banco de Dados](docs/images/cosmo_db.png)
 
 ## Documentação da API
 
 A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equipamento. Todas as rotas utilizam JSON como formato de dados, possuem CORS habilitado, suportam paginação e incluem links HATEOAS.
+
+### 🔐 **Autenticação** - `/auth`
+
+#### **Sistema de Login e Tokens JWT**
+| Método | Rota | Descrição | Payload |
+|--------|------|-----------|---------|
+| `POST` | `/auth/signin` | Autentica usuário e gera tokens JWT | `{"email": "user@example.com", "password": "senha123"}` |
+| `PUT` | `/auth/refresh/{email}` | Renova tokens usando refresh token | Header: `Authorization: Bearer {refreshToken}` |
+
+**Fluxo de Autenticação:**
+1. **Login**: Envie credenciais para `/auth/signin`
+2. **Acesso**: Use o `accessToken` no header `Authorization: Bearer {token}`
+3. **Renovação**: Quando o token expirar, use o `refreshToken` em `/auth/refresh/{email}`
+
+### 👤 **Usuários do Sistema** - `/api/users`
+
+#### **CRUD de Usuários da Aplicação**
+| Método | Rota | Descrição | Payload |
+|--------|------|-----------|---------|
+| `POST` | `/api/users` | Cadastra um novo usuário do sistema | `{"firstName": "João", "lastName": "Silva", "email": "joao@cosmo.com", "password": "senha123"}` |
+| `GET` | `/api/users` | Lista todos os usuários do sistema com paginação | Parâmetros: `page`, `size`, `sort`, `direction` |
+| `GET` | `/api/users/{id}` | Busca um usuário específico por ID | - |
+| `PUT` | `/api/users/{id}` | Atualiza dados de um usuário | `{"firstName": "João", "lastName": "Santos", "email": "joao.santos@cosmo.com", "password": "novaSenha123"}` |
+| `DELETE` | `/api/users/{id}` | Remove um usuário do sistema | - |
+| `GET` | `/api/users/filtrar` | **🔍 Filtra usuários por critérios** | Parâmetros de filtro e paginação |
+
+> **Nota:** Estes são os usuários da aplicação Cosmo (administradores, operadores), diferentes dos usuários finais que recebem equipamentos (entidade `Usuario`).
 
 ### 🏢 **Empresas** - `/api/empresas`
 | Método | Rota | Descrição |
@@ -62,7 +91,7 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 | `DELETE` | `/api/departamentos/{id}` | Remove um departamento do sistema |
 | `GET` | `/api/departamentos/filtrar` | **🔍 Filtra departamentos por critérios** |
 
-### 👤 **Usuários** - `/api/usuarios`
+### 👤 **Usuários Finais** - `/api/usuarios`
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | `GET` | `/api/usuarios` | Lista todos os usuários com paginação |
@@ -155,6 +184,19 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 
 ## 🛡️ Recursos Especiais da API
 
+### **🔐 Sistema de Autenticação JWT**
+- **Tokens Seguros**: Autenticação baseada em JWT com algoritmo HS256
+- **Duplo Token**: Access token (8h) e refresh token (24h) para maior segurança
+- **Stateless**: Não mantém sessões no servidor, escalável horizontalmente
+- **Renovação Automática**: Renovação de tokens sem necessidade de novo login
+- **Validação Rigorosa**: Verificação de assinatura, expiração e integridade dos tokens
+
+### **👥 Controle de Acesso**
+- **Usuários da Aplicação**: Sistema separado para operadores do Cosmo
+- **Usuários Finais**: Pessoas que recebem os equipamentos
+- **Roles e Permissões**: Sistema de papéis configurável via banco de dados
+- **Criptografia de Senhas**: Hash seguro com BCrypt
+
 ### **🔍 Filtragem Avançada com JPA Specifications**
 - **Busca Segura**: Prevenção automática contra SQL Injection
 - **Filtros Combinados**: Múltiplos critérios em uma única consulta
@@ -201,6 +243,9 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 O projeto está em evolução constante. Veja o status atual das funcionalidades:
 
 ### ✅ **Funcionalidades Implementadas**
+- [x] **🔐 Autenticação JWT**: Sistema completo de login e renovação de tokens
+- [x] **👥 Gerenciamento de Usuários**: CRUD completo para usuários da aplicação
+- [x] **🛡️ Spring Security**: Configuração de segurança com JWT
 - [x] **CRUD Completo**: Todas as entidades com operações básicas
 - [x] **Validações de Negócio**: Campos únicos e integridade referencial
 - [x] **Histórico de Movimentação**: Controle completo de entregas/devoluções
@@ -212,7 +257,6 @@ O projeto está em evolução constante. Veja o status atual das funcionalidades
 - [x] **🛡️ Tratamento de Erros**: Mensagens estruturadas e códigos HTTP apropriados
 
 ### 🚧 **Próximos Passos**
-- [ ] **Segurança**: Implementação de Spring Security com JWT
 - [ ] **Importação/Exportação**: Funcionalidade para importar/exportar inventário em CSV/Excel
 - [ ] **Testes**: Cobertura completa de testes unitários e de integração
 - [ ] **Documentação**: Swagger/OpenAPI para documentação interativa
