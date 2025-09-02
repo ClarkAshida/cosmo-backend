@@ -133,18 +133,9 @@ public class EmpresaService {
     private EmpresaResponseDTO addHateoasLinks(EmpresaResponseDTO dto) {
         Long id = dto.getId();
 
-        // Link para si mesmo
+        // Apenas o link para si mesmo (self)
         dto.add(linkTo(methodOn(EmpresaController.class).getEmpresaById(id)).withSelfRel());
 
-        // Link para listar todas as empresas
-        dto.add(linkTo(methodOn(EmpresaController.class)
-                .getAllEmpresas(0, 10, "nome", "asc")).withRel("empresas"));
-
-        // Link para atualizar
-        dto.add(linkTo(methodOn(EmpresaController.class).updateEmpresa(id, null)).withRel("update"));
-
-        // Link para deletar
-        dto.add(linkTo(methodOn(EmpresaController.class).deleteEmpresa(id)).withRel("delete"));
 
         return dto;
     }

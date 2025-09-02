@@ -225,53 +225,9 @@ public class EquipamentoService {
 
     private EquipamentoResponseDTO addHateoasLinks(EquipamentoResponseDTO dto) {
         Long id = dto.getId();
-        String tipo = dto.getTipo().toLowerCase();
 
-        // Link para si mesmo
+        // Apenas o link para si mesmo (self)
         dto.add(linkTo(methodOn(EquipamentoController.class).findById(id)).withSelfRel());
-
-        // Link para listar todos os equipamentos
-        dto.add(linkTo(methodOn(EquipamentoController.class)
-                .findAll(0, 10, "marca", "asc")).withRel("equipamentos"));
-
-        // Link para listar equipamentos do mesmo tipo
-        TipoEquipamento tipoEnum = TipoEquipamento.valueOf(dto.getTipo().toUpperCase());
-        dto.add(linkTo(methodOn(EquipamentoController.class)
-                .findByTipo(tipoEnum, 0, 10, "marca", "asc")).withRel("mesmo-tipo"));
-
-        // Links específicos por tipo de equipamento para atualização
-        switch (tipo) {
-            case "notebook":
-                dto.add(linkTo(methodOn(EquipamentoController.class).updateNotebook(id, null)).withRel("update"));
-                dto.add(linkTo(methodOn(EquipamentoController.class).createNotebook(null)).withRel("create-notebook"));
-                break;
-            case "desktop":
-                dto.add(linkTo(methodOn(EquipamentoController.class).updateDesktop(id, null)).withRel("update"));
-                dto.add(linkTo(methodOn(EquipamentoController.class).createDesktop(null)).withRel("create-desktop"));
-                break;
-            case "celular":
-                dto.add(linkTo(methodOn(EquipamentoController.class).updateCelular(id, null)).withRel("update"));
-                dto.add(linkTo(methodOn(EquipamentoController.class).createCelular(null)).withRel("create-celular"));
-                break;
-            case "chip":
-                dto.add(linkTo(methodOn(EquipamentoController.class).updateChip(id, null)).withRel("update"));
-                dto.add(linkTo(methodOn(EquipamentoController.class).createChip(null)).withRel("create-chip"));
-                break;
-            case "impressora":
-                dto.add(linkTo(methodOn(EquipamentoController.class).updateImpressora(id, null)).withRel("update"));
-                dto.add(linkTo(methodOn(EquipamentoController.class).createImpressora(null)).withRel("create-impressora"));
-                break;
-            case "monitor":
-                dto.add(linkTo(methodOn(EquipamentoController.class).updateMonitor(id, null)).withRel("update"));
-                dto.add(linkTo(methodOn(EquipamentoController.class).createMonitor(null)).withRel("create-monitor"));
-                break;
-        }
-
-        // Link para deletar
-        dto.add(linkTo(methodOn(EquipamentoController.class).deleteById(id)).withRel("delete"));
-
-        // Link para contagem por tipo
-        dto.add(linkTo(methodOn(EquipamentoController.class).countByTipo(tipoEnum)).withRel("count-tipo"));
 
         return dto;
     }

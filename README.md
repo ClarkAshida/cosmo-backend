@@ -17,8 +17,8 @@ O sistema controla não apenas o inventário físico, mas também as movimentaç
 - **Controle de Movimentação**: Histórico completo de entregas e devoluções
 - **Auditoria Imutável**: Registros de histórico preservados através de cancelamento em vez de exclusão
 - **Validações Inteligentes**: Controle automático de campos únicos e integridade de dados
-- **🔗 HATEOAS**: Links de navegação automáticos para descoberta de API
-- **📄 Paginação**: Sistema completo de paginação com metadados e navegação
+- **🔗 HATEOAS Simplificado**: Links de navegação otimizados - apenas "self" para recursos individuais
+- **📄 Paginação Completa**: Sistema robusto de paginação com metadados e links de navegação
 - **🎯 Filtros Dinâmicos**: Sistema avançado de filtragem usando JPA Specifications
 - **📊 Ordenação Flexível**: Ordenação por qualquer campo com direção ascendente/descendente
 
@@ -42,7 +42,7 @@ O backend do Cosmo é construído com as seguintes tecnologias:
 
 ## Documentação da API
 
-A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equipamento. Todas as rotas utilizam JSON como formato de dados, possuem CORS habilitado, suportam paginação e incluem links HATEOAS.
+A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equipamento. Todas as rotas utilizam JSON como formato de dados, possuem CORS habilitado, suportam paginação e incluem links HATEOAS otimizados.
 
 ### 🔐 **Autenticação** - `/auth`
 
@@ -59,48 +59,89 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 
 ### 👤 **Usuários do Sistema** - `/api/users`
 
-#### **CRUD de Usuários da Aplicação**
+#### **CRUD de Usuários da Aplicação (Com Paginação e Filtros)**
 | Método | Rota | Descrição | Payload |
 |--------|------|-----------|---------|
 | `POST` | `/api/users` | Cadastra um novo usuário do sistema | `{"firstName": "João", "lastName": "Silva", "email": "joao@cosmo.com", "password": "senha123"}` |
-| `GET` | `/api/users` | Lista todos os usuários do sistema com paginação | Parâmetros: `page`, `size`, `sort`, `direction` |
+| `GET` | `/api/users` | **📄 Lista usuários com paginação completa** | Parâmetros: `page`, `size`, `sortBy`, `sortDir` |
 | `GET` | `/api/users/{id}` | Busca um usuário específico por ID | - |
-| `PUT` | `/api/users/{id}` | Atualiza dados de um usuário | `{"firstName": "João", "lastName": "Santos", "email": "joao.santos@cosmo.com", "password": "novaSenha123"}` |
+| `PUT` | `/api/users/{id}` | Atualiza dados de um usuário | `{"firstName": "João", "lastName": "Santos", "email": "joao.santos@cosmo.com"}` |
 | `DELETE` | `/api/users/{id}` | Remove um usuário do sistema | - |
-| `GET` | `/api/users/filtrar` | **🔍 Filtra usuários por critérios** | Parâmetros de filtro e paginação |
+| `GET` | `/api/users/filtrar` | **🔍 Filtra usuários com paginação** | Filtros + paginação |
+
+**Exemplo de Response com Paginação:**
+```json
+{
+  "_embedded": {
+    "userResponseDTOList": [
+      {
+        "id": 1,
+        "firstName": "João",
+        "lastName": "Silva",
+        "email": "joao@cosmo.com",
+        "_links": {
+          "self": {
+            "href": "http://localhost:8080/api/users/1"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/api/users?page=0&size=10&sortBy=firstName&sortDir=asc"
+    },
+    "first": {
+      "href": "http://localhost:8080/api/users?page=0&size=10&sortBy=firstName&sortDir=asc"
+    },
+    "last": {
+      "href": "http://localhost:8080/api/users?page=2&size=10&sortBy=firstName&sortDir=asc"
+    },
+    "next": {
+      "href": "http://localhost:8080/api/users?page=1&size=10&sortBy=firstName&sortDir=asc"
+    }
+  },
+  "page": {
+    "size": 10,
+    "totalElements": 25,
+    "totalPages": 3,
+    "number": 0
+  }
+}
+```
 
 > **Nota:** Estes são os usuários da aplicação Cosmo (administradores, operadores), diferentes dos usuários finais que recebem equipamentos (entidade `Usuario`).
 
 ### 🏢 **Empresas** - `/api/empresas`
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/empresas` | Lista todas as empresas com paginação |
-| `GET` | `/api/empresas/{id}` | Busca uma empresa específica por ID |
+| `GET` | `/api/empresas` | **📄 Lista empresas com paginação** |
+| `GET` | `/api/empresas/{id}` | Busca empresa por ID (apenas link "self") |
 | `POST` | `/api/empresas` | Cadastra uma nova empresa |
 | `PUT` | `/api/empresas/{id}` | Atualiza dados de uma empresa existente |
 | `DELETE` | `/api/empresas/{id}` | Remove uma empresa do sistema |
-| `GET` | `/api/empresas/filtrar` | **🔍 Filtra empresas por critérios** |
+| `GET` | `/api/empresas/filtrar` | **🔍 Filtra empresas com paginação** |
 
 ### 🏛️ **Departamentos** - `/api/departamentos`
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/departamentos` | Lista todos os departamentos com paginação |
-| `GET` | `/api/departamentos/{id}` | Busca um departamento específico por ID |
+| `GET` | `/api/departamentos` | **📄 Lista departamentos com paginação** |
+| `GET` | `/api/departamentos/{id}` | Busca departamento por ID (apenas link "self") |
 | `POST` | `/api/departamentos` | Cadastra um novo departamento |
 | `PUT` | `/api/departamentos/{id}` | Atualiza dados de um departamento |
 | `DELETE` | `/api/departamentos/{id}` | Remove um departamento do sistema |
-| `GET` | `/api/departamentos/filtrar` | **🔍 Filtra departamentos por critérios** |
+| `GET` | `/api/departamentos/filtrar` | **🔍 Filtra departamentos com paginação** |
 
 ### 👤 **Usuários Finais** - `/api/usuarios`
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/usuarios` | Lista todos os usuários com paginação |
-| `GET` | `/api/usuarios/{id}` | Busca um usuário específico por ID |
+| `GET` | `/api/usuarios` | **📄 Lista usuários com paginação** |
+| `GET` | `/api/usuarios/{id}` | Busca usuário por ID (apenas link "self") |
 | `POST` | `/api/usuarios` | Cadastra um novo usuário |
 | `PUT` | `/api/usuarios/{id}` | Atualiza dados de um usuário |
 | `DELETE` | `/api/usuarios/{id}` | **Desativa** um usuário (soft delete) |
 | `PATCH` | `/api/usuarios/{id}/reativar` | Reativa um usuário previamente desativado |
-| `GET` | `/api/usuarios/filtrar` | **🔍 Filtra usuários por critérios** |
+| `GET` | `/api/usuarios/filtrar` | **🔍 Filtra usuários com paginação** |
 
 > **Nota:** O delete de usuários é um "soft delete" - apenas marca o usuário como inativo, preservando os dados no banco.
 
@@ -109,12 +150,12 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 #### **📋 Consultas Gerais**
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/equipamentos` | Lista todos os equipamentos com paginação |
-| `GET` | `/api/equipamentos/{id}` | Busca um equipamento específico por ID |
-| `GET` | `/api/equipamentos/tipo/{tipo}` | Lista equipamentos por tipo com paginação |
+| `GET` | `/api/equipamentos` | **📄 Lista equipamentos com paginação** |
+| `GET` | `/api/equipamentos/{id}` | Busca equipamento por ID (apenas link "self") |
+| `GET` | `/api/equipamentos/tipo/{tipo}` | **📄 Lista por tipo com paginação** |
 | `GET` | `/api/equipamentos/tipo/{tipo}/count` | Conta equipamentos por tipo |
 | `DELETE` | `/api/equipamentos/{id}` | Remove um equipamento do sistema |
-| `GET` | `/api/equipamentos/filtrar` | **🔍 Filtra equipamentos por múltiplos critérios** |
+| `GET` | `/api/equipamentos/filtrar` | **🔍 Filtra equipamentos com paginação** |
 
 #### **📱 Criação por Tipo Específico (POST)**
 | Método | Rota | Descrição | Campos Específicos |
@@ -136,32 +177,13 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 | `PUT` | `/api/equipamentos/impressora/{id}` | Atualiza dados de uma impressora |
 | `PUT` | `/api/equipamentos/monitor/{id}` | Atualiza dados de um monitor |
 
-#### **🎯 Valores Aceitos para ENUMs**
-
-**Estado de Conservação:**
-- `NOVO` - Equipamento novo
-- `REGULAR` - Equipamento em bom estado
-- `DANIFICADO` - Equipamento com avarias
-
-**Status do Equipamento:**
-- `DISPONIVEL` - Disponível para uso
-- `EM_USO` - Em uso por algum usuário
-- `EM_MANUTENCAO` - Em manutenção
-- `DANIFICADO` - Danificado
-- `CRIPTOGRAFADO` - Dados criptografados/bloqueado
-- `DESCARTADO` - Descartado
-
-**Status de Propriedade:**
-- `PROPRIO` - Equipamento próprio da empresa
-- `LOCADO` - Equipamento locado/terceirizado
-
 ### 📝 **Histórico** - `/api/historicos`
 
 #### **CRUD Básico**
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/historicos` | Lista todos os registros de histórico com paginação |
-| `GET` | `/api/historicos/{id}` | Busca um registro específico por ID |
+| `GET` | `/api/historicos` | **📄 Lista históricos com paginação** |
+| `GET` | `/api/historicos/{id}` | Busca histórico por ID (apenas link "self") |
 | `PATCH` | `/api/historicos/{id}` | Edita observações e URL de termo de entrega |
 | `PATCH` | `/api/historicos/{id}/cancelar` | Cancela um histórico permanentemente |
 
@@ -176,13 +198,76 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 #### **Consultas Específicas**
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/historicos/usuario/{usuarioId}` | Lista históricos de um usuário com paginação |
-| `GET` | `/api/historicos/equipamento/{equipamentoId}` | Lista históricos de um equipamento com paginação |
+| `GET` | `/api/historicos/usuario/{usuarioId}` | **📄 Lista históricos de usuário com paginação** |
+| `GET` | `/api/historicos/equipamento/{equipamentoId}` | **📄 Lista históricos de equipamento com paginação** |
 | `GET` | `/api/historicos/equipamento/{equipamentoId}/em-uso` | Verifica se equipamento está em uso |
 | `GET` | `/api/historicos/equipamento/{equipamentoId}/ativo` | Busca histórico ativo de um equipamento |
-| `GET` | `/api/historicos/filtrar` | **🔍 Filtra históricos por múltiplos critérios** |
+| `GET` | `/api/historicos/filtrar` | **🔍 Filtra históricos com paginação** |
 
 ## 🛡️ Recursos Especiais da API
+
+### **🔗 HATEOAS Otimizado**
+O sistema implementa HATEOAS de forma simplificada e eficiente:
+
+**Para Recursos Individuais (GET /{id}):**
+```json
+{
+  "id": 1,
+  "nome": "Departamento TI",
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/api/departamentos/1"
+    }
+  }
+}
+```
+
+**Para Paginação (Mantém Links Completos):**
+```json
+{
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/api/departamentos?page=0&size=10&sortBy=nome&sortDir=asc"
+    },
+    "first": {
+      "href": "http://localhost:8080/api/departamentos?page=0&size=10&sortBy=nome&sortDir=asc"
+    },
+    "last": {
+      "href": "http://localhost:8080/api/departamentos?page=6&size=10&sortBy=nome&sortDir=asc"
+    },
+    "next": {
+      "href": "http://localhost:8080/api/departamentos?page=1&size=10&sortBy=nome&sortDir=asc"
+    }
+  },
+  "page": {
+    "size": 10,
+    "totalElements": 62,
+    "totalPages": 7,
+    "number": 0
+  }
+}
+```
+
+### **📄 Sistema de Paginação Robusto**
+- **Paginação no Banco**: Consultas otimizadas sem carregar dados em memória
+- **Metadados Completos**: Total de elementos, páginas e informações de navegação
+- **Links de Navegação**: self, first, last, prev, next automaticamente gerados
+- **Ordenação Configurável**: `sortBy` e `sortDir` para qualquer campo
+- **Tamanho Flexível**: `size` configurável por requisição
+
+**Parâmetros de Paginação:**
+- `page`: Número da página (inicia em 0)
+- `size`: Quantidade de itens por página (padrão: 10)
+- `sortBy`: Campo para ordenação (ex: "nome", "id", "dataEntrega")
+- `sortDir`: Direção da ordenação ("asc" ou "desc")
+
+### **🎯 Filtros Avançados com JPA Specifications**
+- **Busca Segura**: Prevenção automática contra SQL Injection
+- **Filtros Combinados**: Múltiplos critérios em uma única consulta
+- **Case-Insensitive**: Busca por texto ignorando maiúsculas/minúsculas
+- **Filtros de Data**: Intervalos de data com formato `YYYY-MM-DD`
+- **Filtros Relacionais**: Busca por IDs de entidades relacionadas
+- **Paginação Integrada**: Todos os filtros suportam paginação
 
 ### **🔐 Sistema de Autenticação JWT**
 - **Tokens Seguros**: Autenticação baseada em JWT com algoritmo HS256
@@ -191,72 +276,35 @@ A API RESTful do Cosmo oferece endpoints modernos e específicos por tipo de equ
 - **Renovação Automática**: Renovação de tokens sem necessidade de novo login
 - **Validação Rigorosa**: Verificação de assinatura, expiração e integridade dos tokens
 
-### **👥 Controle de Acesso**
-- **Usuários da Aplicação**: Sistema separado para operadores do Cosmo
-- **Usuários Finais**: Pessoas que recebem os equipamentos
-- **Roles e Permissões**: Sistema de papéis configurável via banco de dados
-- **Criptografia de Senhas**: Hash seguro com BCrypt
-
-### **🔍 Filtragem Avançada com JPA Specifications**
-- **Busca Segura**: Prevenção automática contra SQL Injection
-- **Filtros Combinados**: Múltiplos critérios em uma única consulta
-- **Case-Insensitive**: Busca por texto ignorando maiúsculas/minúsculas
-- **Filtros de Data**: Intervalos de data com formato `YYYY-MM-DD`
-- **Filtros Relacionais**: Busca por IDs de entidades relacionadas
-
-### **🔗 HATEOAS e Navegação**
-- **Descoberta Automática**: Links para recursos relacionados
-- **Navegação Intuitiva**: Links de ação baseados no estado do recurso
-- **Padrão HAL+JSON**: Estrutura padronizada de hipermídia
-- **Links Contextuais**: Ações disponíveis conforme permissões e estado
-
-### **📄 Paginação e Performance**
-- **Paginação no Banco**: Consultas otimizadas sem carregar dados em memória
-- **Metadados Completos**: Total de elementos, páginas e navegação
-- **Ordenação Flexível**: Por qualquer campo da entidade
-- **Tamanho Configurável**: Controle do número de itens por página
-
-### **Validações Inteligentes de Negócio**
+### **✅ Validações Inteligentes de Negócio**
 - **Campos Únicos**: Controle automático de duplicação (hostname, IMEI, ICCID, etc.)
 - **ENUMs Validados**: Mensagens claras para valores inválidos
 - **Integridade Referencial**: Validação de empresa e departamento
 - **Histórico Consistente**: Controle automático de status baseado em movimentações
 
-### **Tratamento de Erros Avançado**
+### **🛡️ Tratamento de Erros Avançado**
 - **Mensagens Claras**: Erros específicos com dicas de correção
 - **Códigos HTTP Apropriados**: 409 para conflitos, 400 para dados inválidos
 - **Detalhes Estruturados**: Informações sobre campo, valor e possíveis soluções
 
-### **Soft Delete e Auditoria**
-- **Usuários**: Desativação ao invés de exclusão física
-- **Histórico Imutável**: Cancelamentos preservam dados originais
-- **Rastreabilidade**: Controle completo do ciclo de vida dos ativos
-
-### **Arquitetura Extensível**
-- **Herança de Classes**: Fácil adição de novos tipos de equipamentos
-- **Mappers Especializados**: Conversão automática entre DTOs e entidades
-- **Repositories Específicos**: Queries otimizadas por tipo de equipamento
-- **Specifications Reutilizáveis**: Filtros modulares e componíveis
-
 ## 📋 Status do Projeto
-
-O projeto está em evolução constante. Veja o status atual das funcionalidades:
 
 ### ✅ **Funcionalidades Implementadas**
 - [x] **🔐 Autenticação JWT**: Sistema completo de login e renovação de tokens
 - [x] **👥 Gerenciamento de Usuários**: CRUD completo para usuários da aplicação
+- [x] **📄 Paginação Completa**: Sistema de paginação em todos os endpoints de listagem
+- [x] **🎯 Filtros Dinâmicos**: Sistema de filtros avançados com JPA Specifications
+- [x] **🔗 HATEOAS Otimizado**: Links simplificados - apenas "self" para recursos individuais
+- [x] **📊 Ordenação Flexível**: Por qualquer campo com direção configurável
 - [x] **🛡️ Spring Security**: Configuração de segurança com JWT
 - [x] **CRUD Completo**: Todas as entidades com operações básicas
 - [x] **Validações de Negócio**: Campos únicos e integridade referencial
 - [x] **Histórico de Movimentação**: Controle completo de entregas/devoluções
 - [x] **Soft Delete**: Desativação de usuários preservando dados
-- [x] **🔗 HATEOAS**: Links de navegação em todas as respostas
-- [x] **📄 Paginação**: Sistema completo com metadados e navegação
-- [x] **🎯 Filtros Dinâmicos**: JPA Specifications para busca avançada
-- [x] **📊 Ordenação Flexível**: Por qualquer campo com direção configurável
 - [x] **🛡️ Tratamento de Erros**: Mensagens estruturadas e códigos HTTP apropriados
 
 ### 🚧 **Próximos Passos**
+- [ ] **🔐 Autorização Granular**: Implementação de roles e permissões nos endpoints
 - [ ] **Importação/Exportação**: Funcionalidade para importar/exportar inventário em CSV/Excel
 - [ ] **Testes**: Cobertura completa de testes unitários e de integração
 - [ ] **Documentação**: Swagger/OpenAPI para documentação interativa
