@@ -270,23 +270,8 @@ public class UsuarioService {
     private UsuarioResponseDTO addHateoasLinks(UsuarioResponseDTO dto) {
         Long id = dto.getId();
 
-        // Link para si mesmo
+        // Apenas o link para si mesmo (self)
         dto.add(linkTo(methodOn(UsuarioController.class).getUsuarioById(id)).withSelfRel());
-
-        // Link para listar todos os usuários
-        dto.add(linkTo(methodOn(UsuarioController.class)
-                .getAllUsuarios(0, 10, "nome", "asc")).withRel("usuarios"));
-
-        // Link para atualizar
-        dto.add(linkTo(methodOn(UsuarioController.class).updateUsuario(id, null)).withRel("update"));
-
-        // Link para deletar (desativar)
-        dto.add(linkTo(methodOn(UsuarioController.class).deleteUsuario(id)).withRel("delete"));
-
-        // Link para reativar apenas se o usuário estiver inativo
-        if (!dto.getAtivo()) {
-            dto.add(linkTo(methodOn(UsuarioController.class).reativarUsuario(id)).withRel("reativar"));
-        }
 
         return dto;
     }

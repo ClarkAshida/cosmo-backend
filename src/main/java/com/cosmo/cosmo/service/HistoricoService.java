@@ -563,28 +563,8 @@ public class HistoricoService {
     private HistoricoResponseDTO addHateoasLinks(HistoricoResponseDTO dto) {
         Long id = dto.getId();
 
-        // Link para si mesmo
+        // Apenas o link para si mesmo (self)
         dto.add(linkTo(methodOn(HistoricoController.class).getHistoricoById(id)).withSelfRel());
-
-        // Link para listar todos os históricos
-        dto.add(linkTo(methodOn(HistoricoController.class)
-                .getAllHistoricos(0, 10, "id", "desc")).withRel("historicos"));
-
-        // Links baseados no estado do histórico
-        if (dto.getStatusRegistroHistorico()) {
-            // Histórico ativo - permite edição
-            dto.add(linkTo(methodOn(HistoricoController.class).editarHistorico(id, null)).withRel("editar"));
-
-            if (dto.getDataDevolucao() == null) {
-                // Não foi devolvido ainda - permite devolução e cancelamento
-                dto.add(linkTo(methodOn(HistoricoController.class).devolverEquipamento(id, null)).withRel("devolver"));
-                dto.add(linkTo(methodOn(HistoricoController.class).cancelarHistorico(id, null)).withRel("cancelar"));
-            }
-        }
-
-        // Links para operações múltiplas
-        dto.add(linkTo(methodOn(HistoricoController.class).entregarMultiplosEquipamentos(null)).withRel("entrega-multipla"));
-        dto.add(linkTo(methodOn(HistoricoController.class).devolverMultiplosEquipamentos(null)).withRel("devolucao-multipla"));
 
         return dto;
     }

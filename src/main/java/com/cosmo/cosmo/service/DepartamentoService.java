@@ -133,18 +133,9 @@ public class DepartamentoService {
     private DepartamentoResponseDTO addHateoasLinks(DepartamentoResponseDTO dto) {
         Long id = dto.getId();
 
-        // Link para si mesmo
+        // Apenas o link para si mesmo (self)
         dto.add(linkTo(methodOn(DepartamentoController.class).getDepartamentoById(id)).withSelfRel());
 
-        // Link para listar todos os departamentos
-        dto.add(linkTo(methodOn(DepartamentoController.class)
-                .getAllDepartamentos(0, 10, "nome", "asc")).withRel("departamentos"));
-
-        // Link para atualizar
-        dto.add(linkTo(methodOn(DepartamentoController.class).updateDepartamento(id, null)).withRel("update"));
-
-        // Link para deletar
-        dto.add(linkTo(methodOn(DepartamentoController.class).deleteDepartamento(id)).withRel("delete"));
 
         return dto;
     }
