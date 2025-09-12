@@ -33,6 +33,9 @@ O backend do Cosmo é construído com as seguintes tecnologias:
 * **MySQL:** Banco de dados relacional para armazenamento dos dados.
 * **Lombok:** Para reduzir código boilerplate em classes Java.
 * **Flyway:** Para controle de versão do banco de dados.
+* **Spring Security**: Autenticação e autorização.
+* **JWT (JSON Web Token)**: Autenticação stateless com tokens de acesso e atualização.
+* **BCrypt**: Hash seguro de senhas.
 
 > A implementação de segurança com **Spring Security** está planejada para futuras atualizações.
 
@@ -210,9 +213,9 @@ O projeto está em evolução constante. Veja o status atual das funcionalidades
 - [x] **🎯 Filtros Dinâmicos**: JPA Specifications para busca avançada
 - [x] **📊 Ordenação Flexível**: Por qualquer campo com direção configurável
 - [x] **🛡️ Tratamento de Erros**: Mensagens estruturadas e códigos HTTP apropriados
+- [X] **Segurança**: Implementação de Spring Security com JWT
 
 ### 🚧 **Próximos Passos**
-- [ ] **Segurança**: Implementação de Spring Security com JWT
 - [ ] **Importação/Exportação**: Funcionalidade para importar/exportar inventário em CSV/Excel
 - [ ] **Testes**: Cobertura completa de testes unitários e de integração
 - [ ] **Documentação**: Swagger/OpenAPI para documentação interativa

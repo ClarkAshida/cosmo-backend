@@ -30,3 +30,8 @@ security:
       expire-length: 3600000 # 1 hour in milliseconds
       refresh-token:
         expire-length: 7200000 # 2 hours in milliseconds
+
+spring-doc:
+  paths-to-match: /api/**
+  swagger-ui:
+    use-root-path: true

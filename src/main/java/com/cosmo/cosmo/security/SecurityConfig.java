@@ -34,6 +34,9 @@ public class SecurityConfig {
                 // Only authentication endpoints are public
                 .requestMatchers("/auth/signin", "/auth/refresh/**").permitAll()
 
+                // OpenAPI/Swagger documentation endpoints
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
                 // All user management endpoints require authentication
                 .requestMatchers("/api/users/**").authenticated()
 
