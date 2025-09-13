@@ -16,9 +16,9 @@ public class OpenApiConfig {
     OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Cosmo API Documentation")
+                        .title("Documentação API RESTful do Cosmo")
                         .version("v1")
-                        .description("Cosmo RESTful API documentation. Cosmo is an open-source software for enterprise IT asset management.")
+                        .description("Documentação da API RESTful do Cosmo. Cosmo é um software open-source para gerenciamento de ativos de TI em ambientes corporativos.")
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0")

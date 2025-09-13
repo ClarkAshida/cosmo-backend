@@ -1,6 +1,8 @@
 package com.cosmo.cosmo.mapper.equipamento;
 
 import com.cosmo.cosmo.dto.equipamento.*;
+import com.cosmo.cosmo.dto.empresa.EmpresaResponseDTO;
+import com.cosmo.cosmo.dto.departamento.DepartamentoResponseDTO;
 import com.cosmo.cosmo.entity.equipamento.*;
 import com.cosmo.cosmo.enums.TipoEquipamento;
 import org.springframework.stereotype.Component;
@@ -53,20 +55,25 @@ public class EquipamentoResponseMapper {
         responseDTO.setTermoResponsabilidade(equipamento.getTermoResponsabilidade());
         responseDTO.setValor(equipamento.getValor());
         responseDTO.setNotaFiscal(equipamento.getNotaFiscal());
-        responseDTO.setSiglaEstado(equipamento.getSiglaEstado());
         responseDTO.setObservacoes(equipamento.getObservacoes());
+        responseDTO.setStatusPropriedade(equipamento.getStatusPropriedade());
         responseDTO.setCreatedAt(equipamento.getCreatedAt());
         responseDTO.setUpdatedAt(equipamento.getUpdatedAt());
 
-        // Mapear relacionamentos
+        // Mapear objetos aninhados em vez de campos redundantes
         if (equipamento.getEmpresa() != null) {
-            responseDTO.setEmpresaId(equipamento.getEmpresa().getId());
-            responseDTO.setEmpresaNome(equipamento.getEmpresa().getNome());
+            EmpresaResponseDTO empresaDTO = new EmpresaResponseDTO();
+            empresaDTO.setId(equipamento.getEmpresa().getId());
+            empresaDTO.setNome(equipamento.getEmpresa().getNome());
+            empresaDTO.setEstado(equipamento.getEmpresa().getEstado());
+            responseDTO.setEmpresa(empresaDTO);
         }
 
         if (equipamento.getDepartamento() != null) {
-            responseDTO.setDepartamentoId(equipamento.getDepartamento().getId());
-            responseDTO.setDepartamentoNome(equipamento.getDepartamento().getNome());
+            DepartamentoResponseDTO departamentoDTO = new DepartamentoResponseDTO();
+            departamentoDTO.setId(equipamento.getDepartamento().getId());
+            departamentoDTO.setNome(equipamento.getDepartamento().getNome());
+            responseDTO.setDepartamento(departamentoDTO);
         }
     }
 
@@ -80,7 +87,6 @@ public class EquipamentoResponseMapper {
         details.setDominio(computador.getDominio());
         details.setRemoteAccessEnabled(computador.getRemoteAccessEnabled());
         details.setAntivirusEnabled(computador.getAntivirusEnabled());
-        details.setStatusPropriedade(computador.getStatusPropriedade());
         return details;
     }
 

@@ -1,6 +1,5 @@
 package com.cosmo.cosmo.dto.equipamento;
 
-import com.cosmo.cosmo.enums.StatusPropriedade;
 import lombok.*;
 
 @Getter
@@ -18,5 +17,4 @@ public class ComputadorDetailsDTO {
     private String dominio;
     private Boolean remoteAccessEnabled;
     private Boolean antivirusEnabled;
-    private StatusPropriedade statusPropriedade;
 }

@@ -32,7 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Administração de Usuários", description = "Gerenciamento de usuários do sistema de autenticação. Permite criar, listar, atualizar e excluir usuários com diferentes permissões e roles, além de realizar buscas com filtros avançados e paginação.")
+@Tag(name = "Administração de Usuários", description = "Gerenciamento de usuários administradores do sistema. Permite criar, listar, atualizar e excluir usuários com diferentes permissões e roles, além de realizar buscas com filtros avançados e paginação.")
 public class UserController {
 
     private final UserService userService;

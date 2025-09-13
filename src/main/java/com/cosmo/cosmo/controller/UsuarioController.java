@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/usuarios")
 @CrossOrigin(origins = "*")
-@Tag(name = "Usuários", description = "Gerenciamento de usuários do sistema. Permite criar, listar, atualizar e desativar usuários, além de realizar buscas com filtros e paginação.")
+@Tag(name = "Usuários", description = "Gerenciamento dos colaboradores da empresa que vão receber os equipamentos. Permite criar, listar, atualizar e desativar usuários, além de realizar buscas com filtros e paginação.")
 public class UsuarioController {
 
     @Autowired

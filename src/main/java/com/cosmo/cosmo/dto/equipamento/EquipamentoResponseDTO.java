@@ -28,11 +28,6 @@ public class EquipamentoResponseDTO extends RepresentationModel<EquipamentoRespo
     private Boolean termoResponsabilidade;
     private Float valor;
     private String notaFiscal;
-    private Long empresaId;
-    private String empresaNome;
-    private String siglaEstado;
-    private Long departamentoId;
-    private String departamentoNome;
     private String observacoes;
     private StatusPropriedade statusPropriedade;
     private LocalDateTime createdAt;
@@ -44,7 +39,7 @@ public class EquipamentoResponseDTO extends RepresentationModel<EquipamentoRespo
     // Campo para conter os detalhes específicos do equipamento
     private Object details;
 
-    // Objetos aninhados para HATEOAS
+    // Objetos aninhados para HATEOAS (substituindo os campos redundantes)
     private DepartamentoResponseDTO departamento;
     private EmpresaResponseDTO empresa;
 }

@@ -645,24 +645,6 @@ public class EquipamentoService {
     private EquipamentoResponseDTO addHateoasLinksWithNestedEntities(EquipamentoResponseDTO dto) {
         // Adicionar links HATEOAS para o equipamento principal
         addHateoasLinks(dto);
-
-        // Criar objetos simples de departamento e empresa com apenas ID e nome
-        if (dto.getDepartamentoId() != null) {
-            Departamento departamentoEntity = departamentoService.findEntityById(dto.getDepartamentoId());
-            DepartamentoResponseDTO departamentoSimples = new DepartamentoResponseDTO();
-            departamentoSimples.setId(departamentoEntity.getId());
-            departamentoSimples.setNome(departamentoEntity.getNome());
-            dto.setDepartamento(departamentoSimples);
-        }
-
-        if (dto.getEmpresaId() != null) {
-            com.cosmo.cosmo.entity.Empresa empresaEntity = empresaService.findEntityById(dto.getEmpresaId());
-            EmpresaResponseDTO empresaSimples = new EmpresaResponseDTO();
-            empresaSimples.setId(empresaEntity.getId());
-            empresaSimples.setNome(empresaEntity.getNome());
-            dto.setEmpresa(empresaSimples);
-        }
-
         return dto;
     }
 }
