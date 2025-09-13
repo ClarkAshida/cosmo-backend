@@ -232,7 +232,7 @@ O projeto está em evolução constante. Veja o status atual das funcionalidades
 
 ## 📄 Licença
 
-Este projeto está em desenvolvimento e a licença será definida em breve.
+Este projeto é licenciado sob a Licença Apache, Versão 2.0. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 

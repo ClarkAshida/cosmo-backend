@@ -14,9 +14,13 @@
 	<name>cosmo</name>
 	<description>Backend API for Cosmo, an IT Inventory Web System</description>
 	<url/>
-	<licenses>
-		<license/>
-	</licenses>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 	<developers>
 		<developer/>
 	</developers>
@@ -150,7 +154,40 @@
 					</excludes>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.5</version> <configuration>
+                <headerStyle>JAVADOC_STYLE</headerStyle>
+
+                <header>src/main/resources/license/LICENSE_HEADER.txt</header>
+
+                <properties>
+                    <owner>Flávio Alexandre Orrico Severiano</owner>
+                    <year>${project.inceptionYear}</year> </properties>
+
+                <excludes>
+                    <exclude>**/*.json</exclude>
+                    <exclude>**/*.yml</exclude>
+                    <exclude>**/README.md</exclude>
+                    <exclude>**/pom.xml</exclude>
+                    <exclude>.mvn/**</exclude>
+                    <exclude>src/main/resources/**</exclude>
+                    <exclude>src/test/resources/**</exclude>
+                </excludes>
+
+                <executions>
+                    <execution>
+                        <id>check-license-header</id>
+                        <phase>validate</phase> <goals>
+                        <goal>check</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </configuration>
+            </plugin>
+
 		</plugins>
 	</build>
-
+    <inceptionYear>2025</inceptionYear>
 </project>
