@@ -32,7 +32,7 @@ public class SecurityConfig {
             // Define authorization rules - Phase 2: Hardening
             .authorizeHttpRequests(authorize -> authorize
                 // Only authentication endpoints are public
-                .requestMatchers("/auth/signin", "/auth/refresh/**").permitAll()
+                .requestMatchers("api/auth/signin", "api/auth/refresh/**").permitAll()
 
                 // OpenAPI/Swagger documentation endpoints
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()

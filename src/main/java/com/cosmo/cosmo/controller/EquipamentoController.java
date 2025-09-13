@@ -4,6 +4,14 @@ import com.cosmo.cosmo.dto.geral.PagedResponseDTO;
 import com.cosmo.cosmo.dto.equipamento.*;
 import com.cosmo.cosmo.enums.TipoEquipamento;
 import com.cosmo.cosmo.service.EquipamentoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/equipamentos")
 @CrossOrigin(origins = "*")
+@Tag(name = "Equipamentos", description = "Gerenciamento de equipamentos de TI. Permite criar, listar, atualizar e excluir equipamentos de diferentes tipos (notebooks, desktops, celulares, chips, impressoras e monitores), além de realizar buscas com filtros avançados e paginação.")
 public class EquipamentoController {
 
     @Autowired
@@ -30,10 +39,60 @@ public class EquipamentoController {
      * Busca todos os equipamentos com paginação e ordenação
      */
     @GetMapping
+    @Operation(
+        summary = "Listar todos os equipamentos",
+        description = "Retorna uma lista paginada de todos os equipamentos cadastrados no sistema, independente do tipo. " +
+                     "Suporta ordenação por qualquer campo e paginação configurável."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Lista de equipamentos retornada com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PagedResponseDTO.class),
+                examples = @ExampleObject(
+                    name = "Lista paginada de equipamentos",
+                    value = """
+                        {
+                          "content": [
+                            {
+                              "id": 1,
+                              "serialNumber": "NB001ABC123",
+                              "numeroPatrimonio": "PAT001",
+                              "marca": "Dell",
+                              "modelo": "Inspiron 15 3000",
+                              "estadoConservacao": "BOM",
+                              "status": "DISPONIVEL",
+                              "termoResponsabilidade": false,
+                              "notaFiscal": "NF123456",
+                              "statusPropriedade": "PROPRIO",
+                              "tipo": "NOTEBOOK"
+                            }
+                          ],
+                          "totalElements": 150,
+                          "totalPages": 15,
+                          "size": 10,
+                          "number": 0,
+                          "first": true,
+                          "last": false
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para acessar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public ResponseEntity<PagedResponseDTO<EquipamentoResponseDTO>> findAll(
+            @Parameter(description = "Número da página (começando em 0)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Quantidade de itens por página", example = "10")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Campo para ordenação", example = "id")
             @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "Direção da ordenação", example = "asc", schema = @Schema(allowableValues = {"asc", "desc"}))
             @RequestParam(defaultValue = "asc") String sortDir) {
 
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
@@ -50,7 +109,45 @@ public class EquipamentoController {
      * Busca equipamento por ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> findById(@PathVariable Long id) {
+    @Operation(
+        summary = "Buscar equipamento por ID",
+        description = "Retorna os detalhes de um equipamento específico baseado no seu identificador único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Equipamento encontrado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class),
+                examples = @ExampleObject(
+                    name = "Equipamento encontrado",
+                    value = """
+                        {
+                          "id": 1,
+                          "serialNumber": "NB001ABC123",
+                          "numeroPatrimonio": "PAT001",
+                          "marca": "Dell",
+                          "modelo": "Inspiron 15 3000",
+                          "estadoConservacao": "BOM",
+                          "status": "DISPONIVEL",
+                          "termoResponsabilidade": false,
+                          "notaFiscal": "NF123456",
+                          "statusPropriedade": "PROPRIO",
+                          "tipo": "NOTEBOOK"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para acessar equipamentos"),
+        @ApiResponse(responseCode = "404", description = "Equipamento não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> findById(
+            @Parameter(description = "ID único do equipamento", required = true, example = "1")
+            @PathVariable Long id) {
         EquipamentoResponseDTO equipamento = equipamentoService.findById(id);
         return ResponseEntity.ok(equipamento);
     }
@@ -60,11 +157,33 @@ public class EquipamentoController {
      * Busca equipamentos por tipo específico com paginação
      */
     @GetMapping("/tipo/{tipo}")
+    @Operation(
+        summary = "Buscar equipamentos por tipo",
+        description = "Retorna uma lista paginada de equipamentos filtrados por tipo específico."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Lista de equipamentos por tipo retornada com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = PagedResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para acessar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public ResponseEntity<PagedResponseDTO<EquipamentoResponseDTO>> findByTipo(
+            @Parameter(description = "Tipo do equipamento", required = true, example = "NOTEBOOK", schema = @Schema(allowableValues = {"NOTEBOOK", "DESKTOP", "CELULAR", "CHIP", "IMPRESSORA", "MONITOR"}))
             @PathVariable TipoEquipamento tipo,
+            @Parameter(description = "Número da página (começando em 0)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Quantidade de itens por página", example = "10")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Campo para ordenação", example = "marca")
             @RequestParam(defaultValue = "marca") String sortBy,
+            @Parameter(description = "Direção da ordenação", example = "asc", schema = @Schema(allowableValues = {"asc", "desc"}))
             @RequestParam(defaultValue = "asc") String sortDir) {
 
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
@@ -83,7 +202,54 @@ public class EquipamentoController {
      * Cria um novo notebook
      */
     @PostMapping("/notebook")
-    public ResponseEntity<EquipamentoResponseDTO> createNotebook(@Valid @RequestBody NotebookCreateDTO createDTO) {
+    @Operation(
+        summary = "Criar novo notebook",
+        description = "Cria um novo notebook no sistema. O número de série deve ser único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Notebook criado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou número de série já existe"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para criar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> createNotebook(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dados do notebook a ser criado",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = NotebookCreateDTO.class),
+                    examples = @ExampleObject(
+                        name = "Novo notebook",
+                        value = """
+                            {
+                              "serialNumber": "NB002DEF456",
+                              "numeroPatrimonio": "PAT002",
+                              "marca": "Lenovo",
+                              "modelo": "ThinkPad E14",
+                              "estadoConservacao": "NOVO",
+                              "status": "DISPONIVEL",
+                              "termoResponsabilidade": false,
+                              "notaFiscal": "NF789012",
+                              "statusPropriedade": "PROPRIO",
+                              "processador": "Intel Core i5-10210U",
+                              "memoriaRam": "8GB DDR4",
+                              "armazenamento": "256GB SSD",
+                              "sistemaOperacional": "Windows 11 Pro"
+                            }
+                            """
+                    )
+                )
+            )
+            @Valid @RequestBody NotebookCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createNotebook(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
@@ -93,7 +259,34 @@ public class EquipamentoController {
      * Cria um novo desktop
      */
     @PostMapping("/desktop")
-    public ResponseEntity<EquipamentoResponseDTO> createDesktop(@Valid @RequestBody DesktopCreateDTO createDTO) {
+    @Operation(
+        summary = "Criar novo desktop",
+        description = "Cria um novo desktop no sistema. O número de série deve ser único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Desktop criado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou número de série já existe"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para criar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> createDesktop(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dados do desktop a ser criado",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = DesktopCreateDTO.class)
+                )
+            )
+            @Valid @RequestBody DesktopCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createDesktop(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
@@ -103,7 +296,34 @@ public class EquipamentoController {
      * Cria um novo celular
      */
     @PostMapping("/celular")
-    public ResponseEntity<EquipamentoResponseDTO> createCelular(@Valid @RequestBody CelularCreateDTO createDTO) {
+    @Operation(
+        summary = "Criar novo celular",
+        description = "Cria um novo celular no sistema. O número de série deve ser único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Celular criado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou número de série já existe"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para criar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> createCelular(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dados do celular a ser criado",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = CelularCreateDTO.class)
+                )
+            )
+            @Valid @RequestBody CelularCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createCelular(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
@@ -113,7 +333,34 @@ public class EquipamentoController {
      * Cria um novo chip
      */
     @PostMapping("/chip")
-    public ResponseEntity<EquipamentoResponseDTO> createChip(@Valid @RequestBody ChipCreateDTO createDTO) {
+    @Operation(
+        summary = "Criar novo chip",
+        description = "Cria um novo chip no sistema. O número de linha deve ser único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Chip criado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou número de linha já existe"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para criar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> createChip(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dados do chip a ser criado",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ChipCreateDTO.class)
+                )
+            )
+            @Valid @RequestBody ChipCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createChip(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
@@ -123,7 +370,34 @@ public class EquipamentoController {
      * Cria uma nova impressora
      */
     @PostMapping("/impressora")
-    public ResponseEntity<EquipamentoResponseDTO> createImpressora(@Valid @RequestBody ImpressoraCreateDTO createDTO) {
+    @Operation(
+        summary = "Criar nova impressora",
+        description = "Cria uma nova impressora no sistema. O número de série deve ser único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Impressora criada com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou número de série já existe"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para criar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> createImpressora(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dados da impressora a ser criada",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ImpressoraCreateDTO.class)
+                )
+            )
+            @Valid @RequestBody ImpressoraCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createImpressora(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
@@ -133,7 +407,34 @@ public class EquipamentoController {
      * Cria um novo monitor
      */
     @PostMapping("/monitor")
-    public ResponseEntity<EquipamentoResponseDTO> createMonitor(@Valid @RequestBody MonitorCreateDTO createDTO) {
+    @Operation(
+        summary = "Criar novo monitor",
+        description = "Cria um novo monitor no sistema. O número de série deve ser único."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Monitor criado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou número de série já existe"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para criar equipamentos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> createMonitor(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dados do monitor a ser criado",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = MonitorCreateDTO.class)
+                )
+            )
+            @Valid @RequestBody MonitorCreateDTO createDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.createMonitor(createDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(equipamento);
     }
@@ -145,7 +446,29 @@ public class EquipamentoController {
      * Atualiza um notebook existente
      */
     @PutMapping("/notebook/{id}")
-    public ResponseEntity<EquipamentoResponseDTO> updateNotebook(@PathVariable Long id, @Valid @RequestBody NotebookUpdateDTO updateDTO) {
+    @Operation(
+        summary = "Atualizar notebook existente",
+        description = "Atualiza completamente os dados de um notebook existente. Todos os campos obrigatórios devem ser fornecidos."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Notebook atualizado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = EquipamentoResponseDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para atualizar equipamentos"),
+        @ApiResponse(responseCode = "404", description = "Notebook não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<EquipamentoResponseDTO> updateNotebook(
+            @Parameter(description = "ID único do notebook a ser atualizado", required = true, example = "1")
+            @PathVariable Long id,
+            @Valid @RequestBody NotebookUpdateDTO updateDTO) {
         EquipamentoResponseDTO equipamento = equipamentoService.updateNotebook(id, updateDTO);
         return ResponseEntity.ok(equipamento);
     }
@@ -207,7 +530,22 @@ public class EquipamentoController {
      * Exclui um equipamento por ID
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    @Operation(
+        summary = "Excluir equipamento",
+        description = "Remove um equipamento do sistema. ATENÇÃO: Esta operação não pode ser desfeita. " +
+                     "Verifique se o equipamento não está em uso antes de excluir."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Equipamento excluído com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Equipamento está em uso e não pode ser excluído"),
+        @ApiResponse(responseCode = "401", description = "Token de autenticação inválido ou ausente"),
+        @ApiResponse(responseCode = "403", description = "Usuário não possui permissão para excluir equipamentos"),
+        @ApiResponse(responseCode = "404", description = "Equipamento não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<Void> deleteById(
+            @Parameter(description = "ID único do equipamento a ser excluído", required = true, example = "1")
+            @PathVariable Long id) {
         equipamentoService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

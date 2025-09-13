@@ -5,6 +5,15 @@ import com.cosmo.cosmo.dto.TokenDTO;
 import com.cosmo.cosmo.entity.User;
 import com.cosmo.cosmo.security.JwtTokenProvider;
 import com.cosmo.cosmo.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +32,7 @@ import java.util.List;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Autenticação", description = "Endpoints para autenticação de usuários, incluindo login e renovação de tokens JWT")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -30,7 +40,84 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/signin")
-    public ResponseEntity<TokenDTO> signin(@RequestBody AccountCredentialsDTO credentials) {
+    @Operation(
+        summary = "Realizar login no sistema",
+        description = "Autentica um usuário com email e senha, retornando tokens JWT de acesso e renovação. " +
+                     "O token de acesso deve ser usado para acessar endpoints protegidos, enquanto o token de renovação " +
+                     "pode ser usado para obter novos tokens de acesso sem precisar fazer login novamente.",
+        security = {} // Remove autenticação para este endpoint
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Login realizado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TokenDTO.class),
+                examples = @ExampleObject(
+                    name = "Resposta de login bem-sucedido",
+                    value = """
+                        {
+                          "username": "admin@cosmo.com",
+                          "authenticated": true,
+                          "created": "2025-09-12T22:00:00.000+00:00",
+                          "expiration": "2025-09-12T23:00:00.000+00:00",
+                          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Credenciais inválidas - email ou senha incorretos",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TokenDTO.class),
+                examples = @ExampleObject(
+                    name = "Credenciais inválidas",
+                    value = """
+                        {
+                          "username": "user@example.com",
+                          "authenticated": false,
+                          "created": "2025-09-12T22:00:00.000+00:00",
+                          "expiration": null,
+                          "accessToken": null,
+                          "refreshToken": null
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Dados de entrada inválidos ou malformados"
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Erro interno do servidor"
+        )
+    })
+    public ResponseEntity<TokenDTO> signin(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Credenciais de acesso do usuário",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = AccountCredentialsDTO.class),
+                examples = @ExampleObject(
+                    name = "Credenciais de login",
+                    value = """
+                        {
+                          "email": "admin@cosmo.com",
+                          "password": "admin123"
+                        }
+                        """
+                )
+            )
+        )
+        @RequestBody AccountCredentialsDTO credentials) {
         try {
             log.info("Authentication attempt for user: {}", credentials.email());
 
@@ -83,8 +170,81 @@ public class AuthController {
     }
 
     @PutMapping("/refresh/{email}")
+    @Operation(
+        summary = "Renovar token de acesso",
+        description = "Renova o token de acesso usando um token de renovação válido. " +
+                     "O token de renovação deve ser enviado no header Authorization com o prefixo 'Bearer '. " +
+                     "Este endpoint retorna novos tokens de acesso e renovação, invalidando os anteriores.",
+        security = {} // Remove autenticação padrão pois usa refresh token
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Token renovado com sucesso",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TokenDTO.class),
+                examples = @ExampleObject(
+                    name = "Token renovado com sucesso",
+                    value = """
+                        {
+                          "username": "admin@cosmo.com",
+                          "authenticated": true,
+                          "created": "2025-09-12T22:30:00.000+00:00",
+                          "expiration": "2025-09-12T23:30:00.000+00:00",
+                          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Token de renovação inválido, expirado ou não corresponde ao usuário",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = TokenDTO.class),
+                examples = @ExampleObject(
+                    name = "Token de renovação inválido",
+                    value = """
+                        {
+                          "username": "admin@cosmo.com",
+                          "authenticated": false,
+                          "created": "2025-09-12T22:30:00.000+00:00",
+                          "expiration": null,
+                          "accessToken": null,
+                          "refreshToken": null
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Header Authorization ausente ou formato inválido"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Usuário não encontrado"
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Erro interno do servidor"
+        )
+    })
     public ResponseEntity<TokenDTO> refreshToken(
+            @Parameter(
+                description = "Email do usuário para renovação do token",
+                required = true,
+                example = "admin@cosmo.com"
+            )
             @PathVariable String email,
+            @Parameter(
+                description = "Token de renovação no formato 'Bearer <refresh_token>'",
+                required = true,
+                example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            )
             @RequestHeader("Authorization") String authorizationHeader) {
 
         try {
