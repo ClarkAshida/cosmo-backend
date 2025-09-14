@@ -36,13 +36,50 @@ O sistema controla o inventário físico e as movimentações dos equipamentos, 
 * **Lombok** - Redução de código boilerplate
 * **Swagger/OpenAPI 3** - Documentação interativa da API
 
-![Diagrama do Banco de Dados](docs/images/cosmo_db.png)
+<img src="docs/images/cosmo_db.png" alt="Diagrama do Banco de Dados" height="700"/>
 
 ### Pré-requisitos
 
 - **Java 21** ou superior
 - **Maven 3.6+**
 - **MySQL 8.0+**
+- **Docker**
+
+### Instalação e Configuração
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/ClarkAshida/cosmo-backend
+    cd cosmo-backend
+    ```
+   
+2. Crie um arquivo `.env` na raiz do projeto com as variáveis de ambiente:
+    ```env
+    # Variáveis do Banco de Dados MySQL
+    MYSQL_DATABASE=cosmo
+    MYSQL_USER=root
+    MYSQL_ROOT_PASSWORD=root
+    
+    # Variáveis do Token JWT
+    JWT_SECRET_KEY=53cr3t
+   
+3. Build e Run com Docker:
+   ```bash
+   docker-compose up --build
+   ```
+   
+4. Acesse a aplicação:
+
+    - API: `http://localhost:8080/api`
+    - Swagger UI: `http://localhost:8080/swagger-ui.html`
+    - MySQL: `localhost:3306`
+
+5. Comandos Úteis:
+    - Parar containers: `docker-compose down`
+    - Acessar container MySQL: `docker exec -it cosmo-mysql mysql -u root -p`
+    - Acessar container Backend: `docker exec -it cosmo-backend bash`
+    - Ver logs de todos os serviços: `docker-compose logs -f`
+    - Ver logs apenas da API: `docker-compose logs -f cosmo-api`
 
 ## Documentação da API
 
@@ -162,17 +199,17 @@ A API RESTful do Cosmo oferece endpoints modernos com JSON, CORS habilitado, pag
 - [x] **Autorização** - Controle de acesso baseado em roles
 - [x] **Validações de Negócio** - Campos únicos e integridade referencial
 - [x] **Histórico de Movimentação** - Controle completo de entregas/devoluções
-- [x] **Soft Delete** - Desativação de usuários preservando dados
 - [x] **Paginação** - Sistema completo com metadados
 - [x] **Filtros Dinâmicos** - JPA Specifications para busca avançada
-- [x] **Documentação Swagger** - Interface interativa da API
 - [x] **Tratamento de Erros** - Mensagens estruturadas e códigos HTTP apropriados
 - [x] **HATEOAS** - Links de navegação em respostas da API
+- [x] **Swagger/OpenAPI** - Documentação interativa da API
+- [x] **Flyway** - Gerenciamento de migrações do banco de dados
+- [x] **Dockerização** - Criação de imagens Docker para deploy
 
 ### 🚧 Próximos Passos
 - [ ] **Testes** - Cobertura completa de testes unitários e de integração
 - [ ] **Importação/Exportação** - Funcionalidades para CSV/Excel
-- [ ] **Dockerização** - Criação de imagens Docker para deploy
 - [ ] **Monitoramento** - Integração com ferramentas de observabilidade
 - [ ] **Frontend** - Desenvolvimento da interface web
 - [ ] **Deploy na Cloud** - Pipeline CI/CD automatizado
@@ -183,14 +220,13 @@ A API RESTful do Cosmo oferece endpoints modernos com JSON, CORS habilitado, pag
 - [ ] **Backup Automático** - Sistema de backup e recuperação
 - [ ] **API Rate Limiting** - Controle de taxa de requisições
 
+### Colaboração
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
+
 ## Licença
 
 Este projeto é licenciado sob a Licença Apache, Versão 2.0. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-
-## Colaboração
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
 
 ---
 
