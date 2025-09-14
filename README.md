@@ -1,6 +1,6 @@
 # Cosmo - Gerenciador de Inventário de TI
 
-> 🚧 **Atenção:** Este projeto está em desenvolvimento ativo. Funcionalidades e estruturas podem ser alteradas. 🚧
+> 🚧 **Atenção:** Este projeto está em desenvolvimento ativo. Funcionalidades e estruturas podem ser alteradas.
 
 ## Sobre o Projeto
 
