@@ -57,11 +57,11 @@ O sistema controla o inventário físico e as movimentações dos equipamentos, 
     ```env
     # Variáveis do Banco de Dados MySQL
     MYSQL_DATABASE=cosmo
-    MYSQL_USER=root
-    MYSQL_ROOT_PASSWORD=root
+    MYSQL_USER=SEU_USUARIO
+    MYSQL_ROOT_PASSWORD=SUA_SENHA
     
     # Variáveis do Token JWT
-    JWT_SECRET_KEY=53cr3t
+    JWT_SECRET_KEY=SUA_SECRET_KEY_SEGURA
    
 3. Build e Run com Docker:
    ```bash
